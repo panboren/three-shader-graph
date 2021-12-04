@@ -1,1 +1,1 @@
-export * from './lib/number';
+export { NodeShaderMaterial } from './lib/material'
