@@ -1,6 +1,6 @@
 import { Matrix4, Vector3 } from 'three';
-import { ConstantMat4Node, FloatNode, Mat4Node } from '../types';
 
+import { ConstantMat4Node, FloatNode, Mat4Node } from '../types';
 
 const identityTransform = new ConstantMat4Node(new Matrix4().identity());
 

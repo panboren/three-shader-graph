@@ -1,4 +1,4 @@
-import { ShaderMaterial } from 'three';
+import { IUniform, ShaderMaterial } from 'three';
 import * as THREE from 'three';
 
 import { ShaderGraph } from './compiler';
@@ -27,9 +27,10 @@ const identityMat4 = new ConstantMat4Node(
 type NodeShaderMaterialParameters = {
   readonly color?: IRgbaNode;
   readonly transform?: Mat4Node;
-  readonly uniforms?: { readonly [uniform: string]: { readonly value: any } };
+  readonly uniforms?: { readonly [uniform: string]: IUniform };
   readonly transparent?: boolean;
 };
+
 
 const nodeShaderMaterialDefaults = {
   color: rgba(0x000),
