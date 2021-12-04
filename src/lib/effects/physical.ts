@@ -54,21 +54,21 @@ function calculateHemisphereLight(
     .multiply(BRDF_Lambert(material.diffuseColor));
 }
 
-export type StandardColorParameters = {
+export type StandardMaterialParameters = {
   readonly color: RgbNode;
   readonly emissive: RgbNode;
   readonly emissiveIntensity: FloatNode;
 };
 
-const standardColorParametersDefaults: StandardColorParameters = {
+const standardMaterialParametersDefaults: StandardMaterialParameters = {
   color: rgb(0x000000),
   emissive: rgb(0x000000),
   emissiveIntensity: float(1),
 };
 
-export function standardColor(params: Partial<StandardColorParameters>) {
+export function standardMaterial(params: Partial<StandardMaterialParameters>) {
   const { color, emissive, emissiveIntensity } = {
-    ...standardColorParametersDefaults,
+    ...standardMaterialParametersDefaults,
     ...params,
   };
 

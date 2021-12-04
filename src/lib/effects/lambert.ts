@@ -49,7 +49,7 @@ function calculateDirLight(geometry: Geometry): Vec3Node {
   });
 }
 
-export function lambertColor(diffuse: RgbNode): RgbaNode {
+export function lambertMaterial(diffuse: RgbNode): RgbaNode {
   const geometry = {
     position: transformed.mvPosition.xyz(),
     normal: normalize(transformed.normal),

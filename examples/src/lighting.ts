@@ -3,7 +3,7 @@ import { Clock, Mesh, PerspectiveCamera, PointLight, SphereGeometry, Vector3, We
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { NodeShaderMaterial } from '../../src/index';
 import { float, rgb, uniformFloat } from '../../src/lib/dsl';
-import { standardColor } from '../../src/lib/effects/physical';
+import { standardMaterial } from '../../src/lib/effects/physical';
 import { sin } from '../../src/lib/functions';
 import { translateY } from '../../src/lib/transformation/transforms';
 import { UniformFloatNode } from '../../src/lib/uniforms';
@@ -56,7 +56,7 @@ export function init() {
   const uniformTime = uniformFloat("time")
 
   const material = new NodeShaderMaterial({
-    color: standardColor({ color: rgb(0x00ff00) }),
+    color: standardMaterial({ color: rgb(0x00ff00) }),
     transform: oscilate(uniformTime),
     uniforms: {
       time: { value: 0 }
