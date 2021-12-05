@@ -1,6 +1,8 @@
 import { UniformArrayNode } from './arrays';
+import { uniformVec3, uniformBool } from './dsl';
+import { IntExpressionNode } from './expressions';
 import { StructType } from './structs';
-import { FloatNode, RgbNode, Vec2Node, Vec3Node } from './types';
+import { FloatNode, Mat4Node, RgbNode, Sampler2DNode, Vec2Node, Vec3Node } from './types';
 
 export abstract class PointLight extends StructType {
   static readonly typeName = 'PointLight';
@@ -32,3 +34,43 @@ export abstract class DirectionalLightShadow extends StructType {
 }
 
 export const lightProbe = new UniformArrayNode('lightProbe', Vec3Node, 9);
+
+
+export const uniformPointLights = new UniformArrayNode(
+  'pointLights',
+  PointLight,
+  new IntExpressionNode('NUM_POINT_LIGHTS')
+);
+export const uniformHemisphereLights = new UniformArrayNode(
+  'hemisphereLights',
+  HemisphereLight,
+  new IntExpressionNode('NUM_HEMI_LIGHTS')
+);
+export const uniformDirectionalLights = new UniformArrayNode(
+  'directionalLights',
+  DirectionalLight,
+  new IntExpressionNode('NUM_DIR_LIGHTS')
+);
+export const uniformAmbient = uniformVec3('ambientLightColor');
+export const uniformReceiveShadow = uniformBool('receiveShadow');
+
+export const uniformDirectionalLightShadows = new UniformArrayNode(
+  'directionalLightShadows',
+  DirectionalLightShadow,
+  new IntExpressionNode('NUM_DIR_LIGHT_SHADOWS')
+);
+export const uniformDirectionalShadowMap = new UniformArrayNode(
+  'directionalShadowMaps',
+  Sampler2DNode,
+  new IntExpressionNode('NUM_DIR_LIGHT_SHADOWS')
+);
+export const uniformDirectionalShadowMatrix = new UniformArrayNode(
+  'directionalShadowMatrix',
+  Mat4Node,
+  new IntExpressionNode('NUM_DIR_LIGHT_SHADOWS')
+);
+export const uniformCsmCascades = new UniformArrayNode(
+  'CSM_cascades',
+  Vec2Node,
+  new IntExpressionNode('CSM_CASCADES')
+);

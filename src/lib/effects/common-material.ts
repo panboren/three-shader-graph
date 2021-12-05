@@ -1,69 +1,20 @@
-import { UniformArrayNode } from '../arrays';
 import {
   bool,
   float,
-  neg,
-  uniformBool,
-  uniformFloat,
-  uniformVec3,
-  vec3
+  neg, uniformFloat, vec3
 } from '../dsl';
-import { IntExpressionNode } from '../expressions';
 import { dot, length, mix, normalize, pow, saturate } from '../functions';
 import {
-  DirectionalLight,
-  DirectionalLightShadow,
-  HemisphereLight,
+  DirectionalLight, HemisphereLight,
   PointLight
 } from '../lights';
 import { select } from '../nodes';
 import {
   BooleanNode,
   FloatNode,
-  Mat4Node,
-  Sampler2DNode,
-  Vec2Node,
   Vec3Node
 } from '../types';
 
-export const uniformPointsLights = new UniformArrayNode(
-  'pointLights',
-  PointLight,
-  new IntExpressionNode('NUM_POINT_LIGHTS')
-);
-export const uniformHemisphereLights = new UniformArrayNode(
-  'hemisphereLights',
-  HemisphereLight,
-  new IntExpressionNode('NUM_HEMI_LIGHTS')
-);
-export const uniformDirectionalLights = new UniformArrayNode(
-  'directionalLights',
-  DirectionalLight,
-  new IntExpressionNode('NUM_DIR_LIGHTS')
-);
-export const uniformAmbient = uniformVec3('ambientLightColor');
-export const uniformReceiveShadow = uniformBool('receiveShadow');
-
-export const uniformDirectionalLightShadows = new UniformArrayNode(
-  'directionalLightShadows',
-  DirectionalLightShadow,
-  new IntExpressionNode('NUM_DIR_LIGHT_SHADOWS')
-);
-export const uniformDirectionalShadowMap = new UniformArrayNode(
-  'directionalShadowMaps',
-  Sampler2DNode,
-  new IntExpressionNode('NUM_DIR_LIGHT_SHADOWS')
-);
-export const uniformDirectionalShadowMatrix = new UniformArrayNode(
-  'directionalShadowMatrix',
-  Mat4Node,
-  new IntExpressionNode('NUM_DIR_LIGHT_SHADOWS')
-);
-export const uniformCsmCascades = new UniformArrayNode(
-  'CSM_cascades',
-  Vec2Node,
-  new IntExpressionNode('CSM_CASCADES')
-);
 export const uniformCameraNear = uniformFloat('cameraNear');
 export const uniformShadowFar = uniformFloat('shadowFar');
 

@@ -5,7 +5,7 @@ import {
 } from '../dsl';
 import { dot, normalize, saturate } from '../functions';
 import {
-  PointLight
+  PointLight, uniformAmbient, uniformDirectionalLights, uniformHemisphereLights, uniformPointLights
 } from '../lights';
 import { transformed } from '../transformed';
 import {
@@ -18,12 +18,8 @@ import {
   Geometry,
   getDirectionalLightInfo,
   getHemisphereLightIrradiance,
-  getPointLightInfo,
-  uniformAmbient,
-  uniformDirectionalLights, uniformHemisphereLights,
-  uniformPointsLights
+  getPointLightInfo
 } from './common-material';
-
 
 function calculateHemisphereLight(geometry: Geometry) {
   return uniformHemisphereLights.sum(Vec3Node, (light) =>
@@ -32,7 +28,7 @@ function calculateHemisphereLight(geometry: Geometry) {
 }
 
 function calculatePointLight(geometry: Geometry): Vec3Node {
-  return uniformPointsLights.sum(Vec3Node, (light: PointLight) => {
+  return uniformPointLights.sum(Vec3Node, (light: PointLight) => {
     const directLight = getPointLightInfo(light, geometry);
     const dotNl = dot(geometry.normal, directLight.direction);
     const directLightColor_Diffuse = directLight.color;

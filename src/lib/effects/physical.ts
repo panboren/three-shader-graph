@@ -1,5 +1,6 @@
 import { float, negVec3, rgb, rgba, varyingVec3 } from '../dsl';
 import { dot, normalize, saturate } from '../functions';
+import { uniformPointLights, uniformDirectionalLights, uniformHemisphereLights } from '../lights';
 import { transformed } from '../transformed';
 import { FloatNode, RgbNode, Vec3Node } from '../types';
 import {
@@ -7,9 +8,7 @@ import {
   Geometry,
   getDirectionalLightInfo,
   getHemisphereLightIrradiance,
-  getPointLightInfo,
-  uniformDirectionalLights, uniformHemisphereLights,
-  uniformPointsLights
+  getPointLightInfo
 } from './common-material';
 
 
@@ -21,7 +20,7 @@ function calculatePointLight(
   geometry: Geometry,
   material: PhysicalMaterial
 ): Vec3Node {
-  const directDiffuse = uniformPointsLights.sum(Vec3Node, (light) => {
+  const directDiffuse = uniformPointLights.sum(Vec3Node, (light) => {
     const directLight = getPointLightInfo(light, geometry);
     const dotNL = saturate(dot(geometry.normal, directLight.direction));
     const irradiance = dotNL.multiplyVec3(light.color);
