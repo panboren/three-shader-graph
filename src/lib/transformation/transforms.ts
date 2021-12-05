@@ -37,3 +37,8 @@ export function translateAxis(axis: Vector3, amount: FloatNode): Mat4Node {
   );
   return identityTransform.add(translateMat.multiplyScalar(amount));
 }
+
+
+export function combineTransforms(...transforms: Mat4Node[]) {
+  return transforms.reduce((a, v) => a.multiply(v), identityTransform)
+}
