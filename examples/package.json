@@ -5,11 +5,12 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "build:watch": "webpack --watch"
+    "build:watch": "webpack --watch",
+    "serve": "webpack serve"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "copy-webpack-plugin": "^10.0.0",
     "ts-loader": "^9.2.6",
