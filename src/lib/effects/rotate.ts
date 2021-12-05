@@ -23,7 +23,7 @@ mat4 rotationMatrix(vec3 axis, float angle) {
 }
 */
 
-export function rotationMatrix(rotationAxis: Vec3Node, angle: FloatNode) {
+export function rotateAxis(rotationAxis: Vec3Node, angle: FloatNode) {
   const axis = normalize(rotationAxis);
   const s = sin(angle);
   const c = cos(angle);
@@ -83,5 +83,5 @@ export function rotateVertex(
   rotationAxis: Vec3Node,
   angle: FloatNode
 ): Vec4Node {
-  return rotationMatrix(rotationAxis, angle).multiplyVec(vec4(position, 1));
+  return rotateAxis(rotationAxis, angle).multiplyVec(vec4(position, 1));
 }
