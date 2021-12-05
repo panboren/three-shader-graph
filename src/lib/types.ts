@@ -1238,8 +1238,17 @@ export abstract class RgbaNode extends Vec4Node implements IRgbaNode {
   public isRgba() {
     return true;
   }
+  public r() {
+    return this.x()
+  }
+  public g() {
+    return this.y()
+  }
+  public b() {
+    return this.z()
+  }
   public a() {
-    return getW(this);
+    return this.w();
   }
 }
 
@@ -1267,6 +1276,18 @@ export abstract class RgbNode extends Vec3Node implements IRgbNode {
   public isRgb() {
     return true;
   }
+  public r() {
+    return this.x()
+  }
+  public g() {
+    return this.y()
+  }
+  public b() {
+    return this.z()
+  }
+  public rgba(alpha: IFloatNode) {
+    return new RgbToRgbaNode(this, alpha);
+  }
 }
 
 export class ComponentsRgbaNode extends RgbaNode {
@@ -1291,17 +1312,17 @@ export class ComponentsRgbaNode extends RgbaNode {
 
 export class ComponentsRgbNode extends RgbNode {
   constructor(
-    private readonly r: IFloatNode,
-    private readonly g: IFloatNode,
-    private readonly b: IFloatNode
+    private readonly _r: IFloatNode,
+    private readonly _g: IFloatNode,
+    private readonly _b: IFloatNode
   ) {
     super();
   }
   public compile(c: Compiler) {
     const k = c.variable();
     return {
-      chunk: `vec3 vec3_${k} = vec3(${c.get(this.r)},${c.get(this.g)},${c.get(
-        this.b
+      chunk: `vec3 vec3_${k} = vec3(${c.get(this._r)},${c.get(this._g)},${c.get(
+        this._b
       )});`,
       out: `vec3_${k}`,
     };
@@ -1322,9 +1343,6 @@ export class ConstantRgbNode extends RgbNode {
       out: `vec3_${k}`,
     };
   }
-  public rgba(alpha: IFloatNode) {
-    return new RgbToRgbaNode(this, alpha);
-  }
 }
 
 export class RgbToRgbaNode implements IRgbaNode {
@@ -1338,6 +1356,20 @@ export class RgbToRgbaNode implements IRgbaNode {
     const k = c.variable();
     return {
       chunk: `vec3 vec3_${k} = vec4(${vec}.x,${vec}.y,${vec}.z, ${a});`,
+      out: `vec3_${k}`,
+    };
+  }
+}
+
+export class RgbaToRgbNode implements IRgbNode {
+  constructor(
+    private readonly rgb: RgbaNode
+  ) { }
+  public compile(c: Compiler) {
+    const vec = c.get(this.rgb);
+    const k = c.variable();
+    return {
+      chunk: `vec3 vec3_${k} = vec4(${vec}.x,${vec}.y,${vec}.z);`,
       out: `vec3_${k}`,
     };
   }
