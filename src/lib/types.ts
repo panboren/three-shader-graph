@@ -1391,19 +1391,19 @@ class GetFloatComponentNode extends FloatNode {
   }
 }
 
-export function getX(vec: IVec3Node | IVec4Node | IRgbNode | IRgbaNode) {
+function getX(vec: IVec3Node | IVec4Node | IRgbNode | IRgbaNode) {
   return new GetFloatComponentNode(vec, 'x');
 }
 
-export function getY(vec: IVec3Node | IVec4Node | IRgbNode | IRgbaNode) {
+function getY(vec: IVec3Node | IVec4Node | IRgbNode | IRgbaNode) {
   return new GetFloatComponentNode(vec, 'y');
 }
 
-export function getZ(vec: IVec3Node | IVec4Node | IRgbNode | IRgbaNode) {
+function getZ(vec: IVec3Node | IVec4Node | IRgbNode | IRgbaNode) {
   return new GetFloatComponentNode(vec, 'z');
 }
 
-export function getW(vec: IVec4Node | IRgbaNode) {
+function getW(vec: IVec4Node | IRgbaNode) {
   return new GetFloatComponentNode(vec, 'w');
 }
 

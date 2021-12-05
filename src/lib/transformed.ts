@@ -1,12 +1,10 @@
+import { getX, getY, getZ } from '..';
 import { attributes, uniforms } from './common';
 import { Mat4ExpressionNode } from './expressions';
 import { inverse, transpose } from './functions';
 import {
   ComponentsVec4Node,
   ConstantFloatNode,
-  getX,
-  getY,
-  getZ,
   Vec3Node,
 } from './types';
 
