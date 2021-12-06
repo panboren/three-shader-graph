@@ -1,8 +1,6 @@
 # three-shader-graph
 
-Create shaders with typescript or javascript for Three.js. The library provides the ability to write code that should be familiar to those with experience with GLSL. It will generate GLSL code.
-
-The internals is inspired by visual graph editors, hence the graph terminology. However this is 
+Create shaders with typescript or javascript for Three.js. The library provides the ability to write code that should be familiar to those with experience with GLSL. It will generate GLSL code. The Javascript code will be executed to generate GLSL but the syntax will make it appear as if you are writing shader code direclty. The Javascript code builds a directed acyclic graph which is used to generate the GLSL code. 
 
 ## Why?
 Writing shaders using GLSL for Three.js is not a great developer experience. First of, it is a new language to learn. Second, and more imprtantly, it involves combining chunks of code as strings in order to provide code reusability. Common non-trivial functionality like calculating ligthing is hard to reuse which leads to poor solutions of trying to inject strings of GLSL in multiple places in the built in shaders to add the needed functionality.
