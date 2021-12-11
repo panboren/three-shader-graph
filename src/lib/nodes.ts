@@ -1,5 +1,4 @@
 import { Compiler, ShaderNode } from './compiler';
-import { float, vec2 } from './dsl';
 import {
   BooleanNode,
   FloatNode,
@@ -65,5 +64,3 @@ export const select = <T extends ShaderNode<string>>(
     return selectOfType(Mat4Node, condition, a, b) as unknown as T;
   throw new Error('Can not select on type of ' + a + ' and ' + b);
 };
-
-select(float(5).gt(float(3)), vec2(1, 2), vec2(1, 4));
