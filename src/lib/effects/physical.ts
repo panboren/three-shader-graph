@@ -77,7 +77,6 @@ export function standardMaterial(params: Partial<StandardMaterialParameters>) {
 
   const vPos = varyingVec3(transformed.mvPosition.xyz());
 
-  // TODO Add map texel to diffuse color
   const geometry = {
     position: vPos,
     normal: varyingVec3(normalize(transformed.normal)),
@@ -88,7 +87,6 @@ export function standardMaterial(params: Partial<StandardMaterialParameters>) {
     calculateDirectionalLight(geometry, material)
   );
 
-  // Hemi + ambience + light map
   const indirectDiffuse = calculateHemisphereLight(geometry, material);
 
   const totalDiffuse = directDiffuse.add(indirectDiffuse);
