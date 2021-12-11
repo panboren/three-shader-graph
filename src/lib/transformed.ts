@@ -1,4 +1,4 @@
-import { getX, getY, getZ } from '..';
+import { getX, getY, getZ } from './helpers';
 import { attributes, uniforms } from './common';
 import { Mat4ExpressionNode } from './expressions';
 import { inverse, transpose } from './functions';
