@@ -25,6 +25,16 @@ export abstract class DirectionalLight extends StructType {
   readonly color = this.get(RgbNode, 'color');
 }
 
+export abstract class PointLightShadow extends StructType {
+  static readonly typeName = 'PointLightShadow';
+  readonly shadowBias = this.get(FloatNode, 'shadowBias');
+  readonly shadowNormalBias = this.get(FloatNode, 'shadowNormalBias');
+  readonly shadowRadius = this.get(FloatNode, 'shadowRadius');
+  readonly shadowMapSize = this.get(Vec2Node, 'shadowMapSize');
+  readonly shadowCameraNear = this.get(FloatNode, 'shadowCameraNear');
+  readonly shadowCameraFar = this.get(FloatNode, 'shadowCameraFar');
+}
+
 export abstract class DirectionalLightShadow extends StructType {
   static readonly typeName = 'DirectionalLightShadow';
   readonly shadowBias = this.get(FloatNode, 'shadowBias');
@@ -53,6 +63,23 @@ export const uniformDirectionalLights = new UniformArrayNode(
 );
 export const uniformAmbient = uniformVec3('ambientLightColor');
 export const uniformReceiveShadow = uniformBool('receiveShadow');
+
+export const uniformPointLightShadows = new UniformArrayNode(
+  'pointLightShadows',
+  PointLightShadow,
+  new IntExpressionNode('NUM_POINT_LIGHT_SHADOWS')
+);
+
+export const uniformPointShadowMap = new UniformArrayNode(
+  'pointShadowMap',
+  Sampler2DNode,
+  new IntExpressionNode('NUM_POINT_LIGHT_SHADOWS')
+);
+export const uniformPointShadowMatrix = new UniformArrayNode(
+  'pointShadowMatrix',
+  Mat4Node,
+  new IntExpressionNode('NUM_POINT_LIGHT_SHADOWS')
+);
 
 export const uniformDirectionalLightShadows = new UniformArrayNode(
   'directionalLightShadows',
