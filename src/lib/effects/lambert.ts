@@ -4,9 +4,7 @@ import {
   varyingVec3
 } from '../dsl';
 import { dot, normalize, saturate } from '../functions';
-import {
-  PointLight, uniformAmbient, uniformDirectionalLights, uniformHemisphereLights, uniformPointLights
-} from '../lights';
+import { PointLight, uniformAmbient, uniformDirectionalLights, uniformHemisphereLights, uniformPointLights, PointLightShadow, uniformPointLightShadows, uniformPointShadowMap, uniformPointShadowMatrix, uniformDirectionalShadowMap, DirectionalLightShadow, uniformDirectionalLightShadows, uniformDirectionalShadowMatrix, SpotLightShadow, uniformSpotLightShadows, uniformSpotShadowMap, uniformSpotShadowMatrix, uniformSpotLights, SpotLight } from '../lights';
 import { transformed } from '../transformed';
 import {
   RgbaNode,
@@ -20,7 +18,8 @@ import {
   getHemisphereLightIrradiance,
   getPointLightInfo
 } from './common-material';
-
+import { getSpotLightInfo } from './common-material';
+import { ShadowMaskNode } from './shadow-mask';
 function calculateHemisphereLight(geometry: Geometry) {
   return uniformHemisphereLights.sum(Vec3Node, (light) =>
     getHemisphereLightIrradiance(light, geometry.normal)
@@ -30,6 +29,15 @@ function calculateHemisphereLight(geometry: Geometry) {
 function calculatePointLight(geometry: Geometry): Vec3Node {
   return uniformPointLights.sum(Vec3Node, (light: PointLight) => {
     const directLight = getPointLightInfo(light, geometry);
+    const dotNl = dot(geometry.normal, directLight.direction);
+    const directLightColor_Diffuse = directLight.color;
+    return directLightColor_Diffuse.multiplyScalar(saturate(dotNl));
+  });
+}
+
+function calculateSpotLight(geometry: Geometry): Vec3Node {
+  return uniformSpotLights.sum(Vec3Node, (light: SpotLight) => {
+    const directLight = getSpotLightInfo(light, geometry);
     const dotNl = dot(geometry.normal, directLight.direction);
     const directLightColor_Diffuse = directLight.color;
     return directLightColor_Diffuse.multiplyScalar(saturate(dotNl));
@@ -53,13 +61,14 @@ export function lambertMaterial(diffuse: RgbNode): RgbaNode {
   };
 
   const combinedPointLight = calculatePointLight(geometry);
+  const combinedSpotLight = calculateSpotLight(geometry)
   const combinedHemiLight = calculateHemisphereLight(geometry);
   const combinedDirLight = calculateDirLight(geometry);
 
-  const vLightFront = varyingVec3(combinedPointLight.add(combinedDirLight));
+  const vLightFront = varyingVec3(combinedPointLight.add(combinedDirLight).add(combinedSpotLight));
   const vIndirectFront = varyingVec3(combinedHemiLight.add(uniformAmbient));
 
-  const directDiffuse = vLightFront.multiply(BRDF_Lambert(diffuse));
+  const directDiffuse = vLightFront.multiply(BRDF_Lambert(diffuse)).multiplyScalar(new ShadowMaskNode());
   const indirectDiffuse = vIndirectFront.multiply(BRDF_Lambert(diffuse));
 
   const outgoingLight = directDiffuse.add(indirectDiffuse);
