@@ -29,7 +29,6 @@ function calculatePointLight(
   geometry: Geometry,
   material: PhysicalMaterial
 ): Vec3Node {
-  // TODO Handle when there are no point lights.
   const pointShadowCoords = uniformPointLightShadows.map(Vec4Node, (p, i) => {
     const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
     return uniformPointShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
