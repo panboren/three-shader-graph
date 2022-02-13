@@ -91,6 +91,19 @@ export function init() {
   directionalLight.castShadow = true
   scene.add(directionalLight);
 
+  const spotLight = new THREE.SpotLight(0xffffff, 0.5);
+  spotLight.position.set(1, 15, 0);
+
+  spotLight.castShadow = true;
+
+  spotLight.shadow.mapSize.width = 1024;
+  spotLight.shadow.mapSize.height = 1024;
+
+  spotLight.shadow.camera.near = 1;
+  spotLight.shadow.camera.far = 4000;
+  spotLight.shadow.camera.fov = 30;
+  scene.add(spotLight)
+
   const hemilight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.2);
   scene.add(hemilight);
 

@@ -4,7 +4,7 @@ import {
   varyingVec3
 } from '../dsl';
 import { dot, normalize, saturate } from '../functions';
-import { PointLight, uniformAmbient, uniformDirectionalLights, uniformHemisphereLights, uniformPointLights, PointLightShadow, uniformPointLightShadows, uniformPointShadowMap, uniformPointShadowMatrix, uniformDirectionalShadowMap, DirectionalLightShadow, uniformDirectionalLightShadows, uniformDirectionalShadowMatrix } from '../lights';
+import { PointLight, uniformAmbient, uniformDirectionalLights, uniformHemisphereLights, uniformPointLights, PointLightShadow, uniformPointLightShadows, uniformPointShadowMap, uniformPointShadowMatrix, uniformDirectionalShadowMap, DirectionalLightShadow, uniformDirectionalLightShadows, uniformDirectionalShadowMatrix, SpotLightShadow, uniformSpotLightShadows, uniformSpotShadowMap, uniformSpotShadowMatrix, uniformSpotLights, SpotLight } from '../lights';
 import { transformed } from '../transformed';
 import { vec4 } from '../dsl';
 import { FloatNode, Vec4Node } from '../types';
@@ -24,6 +24,7 @@ import { Compiler } from '../compiler';
 import { VaryingArrayNode } from '../arrays';
 import { uniforms } from '../common';
 import { IntExpressionNode } from '../expressions';
+import { getSpotLightInfo } from './common-material';
 
 class ShadowMapNode extends FloatNode {
   constructor() { super() }
@@ -41,6 +42,14 @@ class ShadowMapNode extends FloatNode {
       return uniformDirectionalShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
     })
     const vDirectionalShadowCoord = c.get(new VaryingArrayNode(directionalShadowCoords, Vec4Node, new IntExpressionNode('NUM_DIR_LIGHT_SHADOWS')))
+
+    const spotLightShadows = c.get(uniformSpotLightShadows.map(SpotLightShadow, i => i))
+    const spotShadowMap = c.get(uniformSpotShadowMap)
+    const spotShadowCoords = uniformSpotLightShadows.map(Vec4Node, (p, i) => {
+      const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
+      return uniformSpotShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
+    })
+    const vSpotShadowCoord = c.get(new VaryingArrayNode(spotShadowCoords, Vec4Node, new IntExpressionNode('NUM_SPOT_LIGHT_SHADOWS')))
 
     const pointLightShadows = c.get(uniformPointLightShadows.map(PointLightShadow, i => i))
     const pointShadowMap = c.get(uniformPointShadowMap)
@@ -286,8 +295,8 @@ class ShadowMapNode extends FloatNode {
         #pragma unroll_loop_start
         for ( int i = 0; i < NUM_SPOT_LIGHT_SHADOWS; i ++ ) {
       
-          spotLight = spotLightShadows[ i ];
-          shadow *= receiveShadow ? getShadow( spotShadowMap[ i ], spotLight.shadowMapSize, spotLight.shadowBias, spotLight.shadowRadius, vSpotShadowCoord[ i ] ) : 1.0;
+          spotLight = ${c.get(uniformSpotLightShadows)}[ i ];
+          shadow *= receiveShadow ? getShadow( ${spotShadowMap}[ i ], spotLight.shadowMapSize, spotLight.shadowBias, spotLight.shadowRadius, ${vSpotShadowCoord}[ i ] ) : 1.0;
       
         }
         #pragma unroll_loop_end
@@ -358,6 +367,15 @@ function calculatePointLight(geometry: Geometry): Vec3Node {
   });
 }
 
+function calculateSpotLight(geometry: Geometry): Vec3Node {
+  return uniformSpotLights.sum(Vec3Node, (light: SpotLight) => {
+    const directLight = getSpotLightInfo(light, geometry);
+    const dotNl = dot(geometry.normal, directLight.direction);
+    const directLightColor_Diffuse = directLight.color;
+    return directLightColor_Diffuse.multiplyScalar(saturate(dotNl));
+  });
+}
+
 function calculateDirLight(geometry: Geometry): Vec3Node {
   return uniformDirectionalLights.sum(Vec3Node, (light) => {
     const directLight = getDirectionalLightInfo(light, geometry);
@@ -375,10 +393,11 @@ export function lambertMaterial(diffuse: RgbNode): RgbaNode {
   };
 
   const combinedPointLight = calculatePointLight(geometry);
+  const combinedSpotLight = calculateSpotLight(geometry)
   const combinedHemiLight = calculateHemisphereLight(geometry);
   const combinedDirLight = calculateDirLight(geometry);
 
-  const vLightFront = varyingVec3(combinedPointLight.add(combinedDirLight));
+  const vLightFront = varyingVec3(combinedPointLight.add(combinedDirLight).add(combinedSpotLight));
   const vIndirectFront = varyingVec3(combinedHemiLight.add(uniformAmbient));
 
   const directDiffuse = vLightFront.multiply(BRDF_Lambert(diffuse)).multiplyScalar(new ShadowMapNode());

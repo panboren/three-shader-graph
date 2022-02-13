@@ -3,10 +3,12 @@ import {
   float,
   neg, uniformFloat, vec3
 } from '../dsl';
-import { dot, length, mix, normalize, pow, saturate } from '../functions';
+import { dot, length, mix, normalize, pow, saturate, smoothstep } from '../functions';
 import {
   DirectionalLight, HemisphereLight,
-  PointLight
+  PointLight,
+  SpotLight,
+  SpotLightShadow
 } from '../lights';
 import { select } from '../nodes';
 import {
@@ -63,6 +65,33 @@ export function getPointLightInfo(
     visible: lightColor.notEquals(vec3(0, 0, 0)),
   };
 }
+
+function getSpotAttenuation(coneCosine: FloatNode, penumbraCosine: FloatNode, angleCosine: FloatNode) {
+  return smoothstep(coneCosine, penumbraCosine, angleCosine);
+}
+
+export function getSpotLightInfo(
+  spotLight: SpotLight,
+  geometry: Geometry
+): IncidentLight {
+  const lVector = spotLight.position.subtract(geometry.position);
+  const direction = normalize(lVector)
+  const angleCos = dot(direction, spotLight.direction)
+  const spotAttenuation = getSpotAttenuation(spotLight.coneCos, spotLight.penumbraCos, angleCos)
+  const lightDistance = length(lVector);
+  const distanceAttenuation = getDistanceAttenuation(
+    lightDistance,
+    spotLight.distance,
+    spotLight.decay
+  );
+  const lightColor = spotLight.color.multiplyScalar(spotAttenuation).multiplyScalar(distanceAttenuation);
+  return {
+    direction,
+    color: lightColor,
+    visible: lightColor.notEquals(vec3(0, 0, 0)),
+  };
+}
+
 
 export function getDirectionalLightInfo(
   directionalLight: DirectionalLight,
