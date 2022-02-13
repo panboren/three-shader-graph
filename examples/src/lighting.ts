@@ -76,7 +76,7 @@ export function init() {
     }
   })
 
-  const mesh = new Mesh(sphere, material)
+  const mesh = new Mesh(sphere, new MeshStandardMaterial({ color: 0x00ff00 }))
   mesh.castShadow = true
   mesh.position.set(0, 0, 0)
   scene.add(mesh)
@@ -85,6 +85,11 @@ export function init() {
   pointlight.position.set(10, 10, 5)
   pointlight.castShadow = true
   scene.add(pointlight)
+
+  const pointlight2 = new PointLight(null, 0.1)
+  pointlight2.position.set(10, 10, 3)
+  pointlight2.castShadow = true
+  scene.add(pointlight2)
 
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
   directionalLight.position.x = -0.5
@@ -127,12 +132,12 @@ function createPlane() {
 
   let material: Material;
   material = new NodeShaderMaterial({
-    color: lambertMaterial(rgb(0xcccccc)),
+    color: standardMaterial({ color: rgb(0xcccccc) }),
     uniforms: {
       time: { value: 0 }
     }
   })
-  //material = new MeshLambertMaterial({ color: 0xcccccc })
+  //material = new MeshStandardMaterial({ color: 0xcccccc })
 
 
   const mesh = new Mesh(plane, material)
