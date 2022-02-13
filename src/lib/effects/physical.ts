@@ -1,7 +1,5 @@
-import { VaryingArrayNode } from '../arrays';
-import { uniforms, attributes } from '../common';
-import { float, int, negVec3, rgb, rgba, varyingVec2, varyingVec3, vec3, vec4, varyingArray } from '../dsl';
-import { IntExpressionNode } from '../expressions';
+import { uniforms } from '../common';
+import { float, negVec3, rgb, rgba, varyingVec2, varyingVec3, vec3, vec4, varyingArray } from '../dsl';
 import { dot, normalize, saturate } from '../functions';
 import { uniformPointLights, uniformDirectionalLights, uniformHemisphereLights, uniformSpotLights, uniformPointShadowMap, uniformPointLightShadows, uniformPointShadowMatrix, uniformDirectionalShadowMatrix, uniformDirectionalLightShadows, uniformDirectionalShadowMap, uniformSpotLightShadows, uniformSpotShadowMap, uniformSpotShadowMatrix } from '../lights';
 import { transformed } from '../transformed';
@@ -29,13 +27,13 @@ function calculatePointLight(
   geometry: Geometry,
   material: PhysicalMaterial
 ): Vec3Node {
-  const pointShadowCoords = uniformPointLightShadows.map(Vec4Node, (p, i) => {
+  const pointShadowCoords = uniformPointLightShadows.map((p, i) => {
     const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
     return uniformPointShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
   })
   const vPointShadowCoord = varyingArray(pointShadowCoords)
 
-  const directDiffuse = uniformPointLights.sum(Vec3Node, (light, i) => {
+  const directDiffuse = uniformPointLights.sum((light, i) => {
 
     const pointLightShadow = uniformPointLightShadows.get(i)
     const shadowFactor = new GetPointShadowNode(
@@ -60,13 +58,13 @@ function calculateSpotLight(
   geometry: Geometry,
   material: PhysicalMaterial
 ): Vec3Node {
-  const spotShadowCoords = uniformSpotLightShadows.map(Vec4Node, (p, i) => {
+  const spotShadowCoords = uniformSpotLightShadows.map((p, i) => {
     const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
     return uniformSpotShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
   })
   const vSpotShadowCoord = varyingArray(spotShadowCoords)
 
-  const directDiffuse = uniformSpotLights.sum(Vec3Node, (light, i) => {
+  const directDiffuse = uniformSpotLights.sum((light, i) => {
 
     const spotLightShadow = uniformSpotLightShadows.get(i)
     const shadowFactor = new GetShadowNode(
@@ -89,13 +87,13 @@ function calculateDirectionalLight(
   geometry: Geometry,
   material: PhysicalMaterial
 ): Vec3Node {
-  const directionalShadowCoords = uniformDirectionalLightShadows.map(Vec4Node, (p, i) => {
+  const directionalShadowCoords = uniformDirectionalLightShadows.map((p, i) => {
     const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
     return uniformDirectionalShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
   })
   const vDirectionalShadowCoord = varyingArray(directionalShadowCoords)
 
-  const directDiffuse = uniformDirectionalLights.sum(Vec3Node, (light, i) => {
+  const directDiffuse = uniformDirectionalLights.sum((light, i) => {
 
     const directionalLightShadow = uniformDirectionalLightShadows.get(i)
     const shadowFactor = new GetShadowNode(
@@ -119,7 +117,7 @@ function calculateHemisphereLight(
   material: PhysicalMaterial
 ) {
   return uniformHemisphereLights
-    .sum(Vec3Node, (light) =>
+    .sum((light) =>
       getHemisphereLightIrradiance(light, geometry.normal)
     )
     .multiply(BRDF_Lambert(material.diffuseColor));

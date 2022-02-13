@@ -17,25 +17,25 @@ export class ShadowMaskNode extends FloatNode {
     const shadowWorldNormal = normalize((vec4(transformed.normal, 0.0).multiplyMat(uniforms.viewMatrix)).xyz())
 
     // Need to reference the uniforms to ensure they are loaded
-    const directionalLightShadows = c.get(uniformDirectionalLightShadows.map(DirectionalLightShadow, i => i))
+    const directionalLightShadows = c.get(uniformDirectionalLightShadows.map(i => i))
     const directionalShadowMap = c.get(uniformDirectionalShadowMap)
-    const directionalShadowCoords = uniformDirectionalLightShadows.map(Vec4Node, (p, i) => {
+    const directionalShadowCoords = uniformDirectionalLightShadows.map((p, i) => {
       const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
       return uniformDirectionalShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
     })
     const vDirectionalShadowCoord = c.get(varyingArray(directionalShadowCoords))
 
-    const spotLightShadows = c.get(uniformSpotLightShadows.map(SpotLightShadow, i => i))
+    const spotLightShadows = c.get(uniformSpotLightShadows.map(i => i))
     const spotShadowMap = c.get(uniformSpotShadowMap)
-    const spotShadowCoords = uniformSpotLightShadows.map(Vec4Node, (p, i) => {
+    const spotShadowCoords = uniformSpotLightShadows.map((p, i) => {
       const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
       return uniformSpotShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
     })
     const vSpotShadowCoord = c.get(varyingArray(spotShadowCoords))
 
-    const pointLightShadows = c.get(uniformPointLightShadows.map(PointLightShadow, i => i))
+    const pointLightShadows = c.get(uniformPointLightShadows.map(i => i))
     const pointShadowMap = c.get(uniformPointShadowMap)
-    const pointShadowCoords = uniformPointLightShadows.map(Vec4Node, (p, i) => {
+    const pointShadowCoords = uniformPointLightShadows.map((p, i) => {
       const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
       return uniformPointShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
     })

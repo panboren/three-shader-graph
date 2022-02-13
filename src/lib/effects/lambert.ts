@@ -21,13 +21,13 @@ import {
 import { getSpotLightInfo } from './common-material';
 import { ShadowMaskNode } from './shadow-mask';
 function calculateHemisphereLight(geometry: Geometry) {
-  return uniformHemisphereLights.sum(Vec3Node, (light) =>
+  return uniformHemisphereLights.sum((light) =>
     getHemisphereLightIrradiance(light, geometry.normal)
   );
 }
 
 function calculatePointLight(geometry: Geometry): Vec3Node {
-  return uniformPointLights.sum(Vec3Node, (light: PointLight) => {
+  return uniformPointLights.sum((light: PointLight) => {
     const directLight = getPointLightInfo(light, geometry);
     const dotNl = dot(geometry.normal, directLight.direction);
     const directLightColor_Diffuse = directLight.color;
@@ -36,7 +36,7 @@ function calculatePointLight(geometry: Geometry): Vec3Node {
 }
 
 function calculateSpotLight(geometry: Geometry): Vec3Node {
-  return uniformSpotLights.sum(Vec3Node, (light: SpotLight) => {
+  return uniformSpotLights.sum((light: SpotLight) => {
     const directLight = getSpotLightInfo(light, geometry);
     const dotNl = dot(geometry.normal, directLight.direction);
     const directLightColor_Diffuse = directLight.color;
@@ -45,7 +45,7 @@ function calculateSpotLight(geometry: Geometry): Vec3Node {
 }
 
 function calculateDirLight(geometry: Geometry): Vec3Node {
-  return uniformDirectionalLights.sum(Vec3Node, (light) => {
+  return uniformDirectionalLights.sum((light) => {
     const directLight = getDirectionalLightInfo(light, geometry);
     const dotNL = dot(geometry.normal, directLight.direction);
     const directLightColor_Diffuse = directLight.color;

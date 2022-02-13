@@ -32,11 +32,15 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
   }
 
   public sum<R extends ShaderNode<string> & { add(o: R): R }>(
-    type: BaseType<R>,
     block: (v: T, index: IntNode) => R
   ) {
     const self = this;
     const indexReference = new IntExpressionNode('i');
+    const blockReturn = block(
+      self.get(new IntExpressionNode('i')),
+      indexReference
+    )
+    const type = blockReturn.constructor as BaseType<R>
     // @ts-expect-error
     return new (class extends type {
       public compile(c: Compiler) {
@@ -57,10 +61,7 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
         const innerChunkStartIndex = c.chunks.length
 
         c.startScope();
-        const blockResultOut = c.get(block(
-          self.get(new IntExpressionNode('i')),
-          indexReference
-        ));
+        const blockResultOut = c.get(blockReturn);
         c.stopScope();
 
 
@@ -91,11 +92,15 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
   }
 
   public map<R extends ShaderNode<string>>(
-    returnType: BaseType<R>,
     block: (v: T, index: IntNode) => R
   ) {
     const self = this;
     const indexReference = new IntExpressionNode('i');
+    const blockReturn = block(
+      self.get(indexReference),
+      indexReference
+    )
+    const returnType = blockReturn.constructor as BaseType<R>
     // @ts-expect-error
     return new (class extends ArrayNode<R> {
       protected readonly type = returnType
@@ -115,10 +120,7 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
         c.chunks.push(start);
 
         c.startScope();
-        const blockResult = block(
-          self.get(indexReference),
-          indexReference
-        ).compile(c);
+        const blockResult = blockReturn.compile(c);
         c.stopScope();
 
         return {

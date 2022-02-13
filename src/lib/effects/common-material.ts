@@ -7,8 +7,7 @@ import { dot, length, mix, normalize, pow, saturate, smoothstep } from '../funct
 import {
   DirectionalLight, HemisphereLight,
   PointLight,
-  SpotLight,
-  SpotLightShadow
+  SpotLight
 } from '../lights';
 import { select } from '../nodes';
 import {
@@ -107,7 +106,7 @@ export function getDirectionalLightInfo(
 export function getHemisphereLightIrradiance(
   hemiLight: HemisphereLight,
   normal: Vec3Node
-) {
+): Vec3Node {
   const dotNL = dot(normal, hemiLight.direction);
   const hemiDiffuseWeight = float(0.5).multiply(dotNL).add(float(0.5));
   const irradiance = mix(
