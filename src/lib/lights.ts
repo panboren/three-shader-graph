@@ -87,7 +87,7 @@ export const uniformDirectionalLightShadows = new UniformArrayNode(
   new IntExpressionNode('NUM_DIR_LIGHT_SHADOWS')
 );
 export const uniformDirectionalShadowMap = new UniformArrayNode(
-  'directionalShadowMaps',
+  'directionalShadowMap',
   Sampler2DNode,
   new IntExpressionNode('NUM_DIR_LIGHT_SHADOWS')
 );

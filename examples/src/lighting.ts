@@ -68,16 +68,13 @@ export function init() {
 
   const uniformTime = uniformFloat("time")
 
-  let material: Material = new NodeShaderMaterial({
+  let material = new NodeShaderMaterial({
     color: standardMaterial({ color: rgb(0x00ff00) }),
     transform: oscilate(uniformTime),
     uniforms: {
       time: { value: 0 }
     }
   })
-
-  // At least one mesh standard material must exist in the scene or directional light does not update
-  material = new MeshStandardMaterial({ color: 0x00ff00 })
 
   const mesh = new Mesh(sphere, material)
   mesh.castShadow = true
@@ -101,7 +98,7 @@ export function init() {
 
   function render() {
     stats.begin()
-    //material.uniforms.time.value = clock.getElapsedTime()
+    material.uniforms.time.value = clock.getElapsedTime()
 
     renderer.render(scene, camera)
     stats.end()
@@ -118,16 +115,11 @@ function createPlane() {
   let material: Material;
   material = new NodeShaderMaterial({
     color: lambertMaterial(rgb(0xcccccc)),
-    //color: uniformDirectionalShadowMap.get(0).sample(varyingVec2(attributes.uv)),
     uniforms: {
       time: { value: 0 }
     }
   })
   //material = new MeshLambertMaterial({ color: 0xcccccc })
-  /*material.onBeforeCompile = (shader) => {
-    console.log(shader.fragmentShader)
-    shader.fragmentShader += '34'
-  }*/
 
 
   const mesh = new Mesh(plane, material)

@@ -263,8 +263,6 @@ class ShadowMapNode extends FloatNode {
       float getShadowMask(bool receiveShadow) {
 
         float shadow = 1.0;
-        float shadowDir = 1.0;
-        float shadowPoint = 1.0;
       
         #ifdef USE_SHADOWMAP
       
@@ -275,7 +273,7 @@ class ShadowMapNode extends FloatNode {
         #pragma unroll_loop_start
         for ( int i = 0; i < NUM_DIR_LIGHT_SHADOWS; i ++ ) {
           directionalLight = ${c.get(uniformDirectionalLightShadows)}[ i ];
-          shadowDir *= receiveShadow ? getShadow( ${directionalShadowMap}[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, ${vDirectionalShadowCoord}[ i ]) : 1.0;
+          shadow *= receiveShadow ? getShadow( ${directionalShadowMap}[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, ${vDirectionalShadowCoord}[ i ]) : 1.0;
         }
         #pragma unroll_loop_end
       
@@ -303,8 +301,7 @@ class ShadowMapNode extends FloatNode {
         #pragma unroll_loop_start
         for ( int i = 0; i < NUM_POINT_LIGHT_SHADOWS; i ++ ) {
           pointLight = ${c.get(uniformPointLightShadows)}[ i ];
-          
-          //shadowPoint *= receiveShadow ? getPointShadow( ${pointShadowMap}[ i ], pointLight.shadowMapSize, pointLight.shadowBias, pointLight.shadowRadius, ${vPointShadowCoord}[ i ], pointLight.shadowCameraNear, pointLight.shadowCameraFar ) : 1.0;
+          shadow *= receiveShadow ? getPointShadow( ${pointShadowMap}[ i ], pointLight.shadowMapSize, pointLight.shadowBias, pointLight.shadowRadius, ${vPointShadowCoord}[ i ], pointLight.shadowCameraNear, pointLight.shadowCameraFar ) : 1.0;
       
         }
         #pragma unroll_loop_end
@@ -321,7 +318,7 @@ class ShadowMapNode extends FloatNode {
       
         #endif
       
-        return shadowDir;
+        return shadow;
       
       }
       vec3 inverseTransformDirection( in vec3 dir, in mat4 matrix ) {
