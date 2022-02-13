@@ -147,7 +147,7 @@ export type ShaderNode<T = string> = {
 export function outputPosition(position: Vec4Node) {
   return uniforms.projectionMatrix
     .multiply(uniforms.modelViewMatrix)
-    .multiplyVec(position);
+    .multiplyVec(uniforms.instanceMatrix.multiplyVec(position));
 }
 
 export class ShaderGraph {

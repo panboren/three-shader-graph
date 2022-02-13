@@ -1,3 +1,6 @@
+import { Mat4Node } from './types';
+import { Compiler } from './compiler';
+import { identityTransform } from './transformation/transforms';
 import {
   Mat3ExpressionNode,
   Mat4ExpressionNode,
@@ -12,7 +15,24 @@ export const attributes = {
   uv: new Vec2ExpressionNode('uv'),
 };
 
+class InstanceMatrixNode extends Mat4Node {
+  public compile(c: Compiler) {
+    const k = c.variable();
+    const identity = c.get(identityTransform)
+    return {
+      chunk: `
+        mat4 instanceMatrixOpt_${k} = ${identity};
+        #ifdef USE_INSTANCING
+          instanceMatrixOpt_${k} = instanceMatrix;
+        #endif
+      `,
+      out: `instanceMatrixOpt_${k}`
+    }
+  }
+}
+
 export const uniforms = {
+  instanceMatrix: new InstanceMatrixNode(),
   modelMatrix: new Mat4ExpressionNode('modelMatrix'),
   modelViewMatrix: new Mat4ExpressionNode('modelViewMatrix'),
   projectionMatrix: new Mat4ExpressionNode('projectionMatrix'),

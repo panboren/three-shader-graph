@@ -2,7 +2,7 @@ import { Matrix4, Vector3 } from 'three';
 
 import { ConstantMat4Node, FloatNode, Mat4Node } from '../types';
 
-const identityTransform = new ConstantMat4Node(new Matrix4().identity());
+export const identityTransform = new ConstantMat4Node(new Matrix4().identity());
 
 export function translateX(amount: FloatNode): Mat4Node {
   return translateAxis(new Vector3(1, 0, 0), amount);
