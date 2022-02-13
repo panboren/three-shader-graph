@@ -4,7 +4,7 @@ import {
   varyingVec3
 } from '../dsl';
 import { dot, normalize, saturate } from '../functions';
-import { PointLight, uniformAmbient, uniformDirectionalLights, uniformHemisphereLights, uniformPointLights, PointLightShadow, uniformPointLightShadows, uniformPointShadowMap, uniformPointShadowMatrix } from '../lights';
+import { PointLight, uniformAmbient, uniformDirectionalLights, uniformHemisphereLights, uniformPointLights, PointLightShadow, uniformPointLightShadows, uniformPointShadowMap, uniformPointShadowMatrix, uniformDirectionalShadowMap, DirectionalLightShadow, uniformDirectionalLightShadows, uniformDirectionalShadowMatrix } from '../lights';
 import { transformed } from '../transformed';
 import { vec4 } from '../dsl';
 import { FloatNode, Vec4Node } from '../types';
@@ -29,16 +29,27 @@ class ShadowMapNode extends FloatNode {
   constructor() { super() }
   public compile(c: Compiler) {
     const k = c.variable()
-    const pointLightShadows = c.get(uniformPointLightShadows.map(PointLightShadow, i => i))
-    const pointShadowMap = c.get(uniformPointShadowMap)
     const worldPosition = uniforms.modelMatrix.multiplyVec(transformed.position)
 
     const shadowWorldNormal = normalize((vec4(transformed.normal, 0.0).multiplyMat(uniforms.viewMatrix)).xyz())
+
+    // Need to reference the uniforms to ensure they are loaded
+    const directionalLightShadows = c.get(uniformDirectionalLightShadows.map(DirectionalLightShadow, i => i))
+    const directionalShadowMap = c.get(uniformDirectionalShadowMap)
+    const directionalShadowCoords = uniformDirectionalLightShadows.map(Vec4Node, (p, i) => {
+      const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
+      return uniformDirectionalShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
+    })
+    const vDirectionalShadowCoord = c.get(new VaryingArrayNode(directionalShadowCoords, Vec4Node, new IntExpressionNode('NUM_DIR_LIGHT_SHADOWS')))
+
+    const pointLightShadows = c.get(uniformPointLightShadows.map(PointLightShadow, i => i))
+    const pointShadowMap = c.get(uniformPointShadowMap)
     const pointShadowCoords = uniformPointLightShadows.map(Vec4Node, (p, i) => {
       const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
       return uniformPointShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
     })
     const vPointShadowCoord = c.get(new VaryingArrayNode(pointShadowCoords, Vec4Node, new IntExpressionNode('NUM_POINT_LIGHT_SHADOWS')))
+
 
     return {
       'pars': `
@@ -146,9 +157,114 @@ class ShadowMapNode extends FloatNode {
           #endif
     
       }
-      float getShadowMask(PointLightShadow[NUM_POINT_LIGHT_SHADOWS] pointLightShadows, vec4[NUM_POINT_LIGHT_SHADOWS] vPointShadowCoord, bool receiveShadow) {
+      float getShadow( sampler2D shadowMap, vec2 shadowMapSize, float shadowBias, float shadowRadius, vec4 shadowCoord ) {
 
         float shadow = 1.0;
+    
+        shadowCoord.xyz /= shadowCoord.w;
+        shadowCoord.z += shadowBias;
+    
+        // if ( something && something ) breaks ATI OpenGL shader compiler
+        // if ( all( something, something ) ) using this instead
+    
+        bvec4 inFrustumVec = bvec4 ( shadowCoord.x >= 0.0, shadowCoord.x <= 1.0, shadowCoord.y >= 0.0, shadowCoord.y <= 1.0 );
+        bool inFrustum = all( inFrustumVec );
+    
+        bvec2 frustumTestVec = bvec2( inFrustum, shadowCoord.z <= 1.0 );
+    
+        bool frustumTest = all( frustumTestVec );
+    
+        if ( frustumTest ) {
+                
+          #if defined( SHADOWMAP_TYPE_PCF )
+
+          vec2 texelSize = vec2( 1.0 ) / shadowMapSize;
+
+          float dx0 = - texelSize.x * shadowRadius;
+          float dy0 = - texelSize.y * shadowRadius;
+          float dx1 = + texelSize.x * shadowRadius;
+          float dy1 = + texelSize.y * shadowRadius;
+          float dx2 = dx0 / 2.0;
+          float dy2 = dy0 / 2.0;
+          float dx3 = dx1 / 2.0;
+          float dy3 = dy1 / 2.0;
+
+          shadow = (
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx0, dy0 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( 0.0, dy0 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx1, dy0 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx2, dy2 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( 0.0, dy2 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx3, dy2 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx0, 0.0 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx2, 0.0 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy, shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx3, 0.0 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx1, 0.0 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx2, dy3 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( 0.0, dy3 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx3, dy3 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx0, dy1 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( 0.0, dy1 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx1, dy1 ), shadowCoord.z )
+          ) * ( 1.0 / 17.0 );
+
+        #elif defined( SHADOWMAP_TYPE_PCF_SOFT )
+
+          vec2 texelSize = vec2( 1.0 ) / shadowMapSize;
+          float dx = texelSize.x;
+          float dy = texelSize.y;
+
+          vec2 uv = shadowCoord.xy;
+          vec2 f = fract( uv * shadowMapSize + 0.5 );
+          uv -= f * texelSize;
+
+          shadow = (
+            texture2DCompare( shadowMap, uv, shadowCoord.z ) +
+            texture2DCompare( shadowMap, uv + vec2( dx, 0.0 ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, uv + vec2( 0.0, dy ), shadowCoord.z ) +
+            texture2DCompare( shadowMap, uv + texelSize, shadowCoord.z ) +
+            mix( texture2DCompare( shadowMap, uv + vec2( -dx, 0.0 ), shadowCoord.z ), 
+              texture2DCompare( shadowMap, uv + vec2( 2.0 * dx, 0.0 ), shadowCoord.z ),
+              f.x ) +
+            mix( texture2DCompare( shadowMap, uv + vec2( -dx, dy ), shadowCoord.z ), 
+              texture2DCompare( shadowMap, uv + vec2( 2.0 * dx, dy ), shadowCoord.z ),
+              f.x ) +
+            mix( texture2DCompare( shadowMap, uv + vec2( 0.0, -dy ), shadowCoord.z ), 
+              texture2DCompare( shadowMap, uv + vec2( 0.0, 2.0 * dy ), shadowCoord.z ),
+              f.y ) +
+            mix( texture2DCompare( shadowMap, uv + vec2( dx, -dy ), shadowCoord.z ), 
+              texture2DCompare( shadowMap, uv + vec2( dx, 2.0 * dy ), shadowCoord.z ),
+              f.y ) +
+            mix( mix( texture2DCompare( shadowMap, uv + vec2( -dx, -dy ), shadowCoord.z ), 
+                  texture2DCompare( shadowMap, uv + vec2( 2.0 * dx, -dy ), shadowCoord.z ),
+                  f.x ),
+              mix( texture2DCompare( shadowMap, uv + vec2( -dx, 2.0 * dy ), shadowCoord.z ), 
+                  texture2DCompare( shadowMap, uv + vec2( 2.0 * dx, 2.0 * dy ), shadowCoord.z ),
+                  f.x ),
+              f.y )
+          ) * ( 1.0 / 9.0 );
+
+        #elif defined( SHADOWMAP_TYPE_VSM )
+
+          shadow = VSMShadow( shadowMap, shadowCoord.xy, shadowCoord.z );
+
+        #else // no percentage-closer filtering:
+
+          shadow = texture2DCompare( shadowMap, shadowCoord.xy, shadowCoord.z );
+
+        #endif
+
+        }
+    
+        return shadow;
+    
+      }
+      float getShadowMask(bool receiveShadow) {
+
+        float shadow = 1.0;
+        float shadowDir = 1.0;
+        float shadowPoint = 1.0;
       
         #ifdef USE_SHADOWMAP
       
@@ -158,10 +274,8 @@ class ShadowMapNode extends FloatNode {
       
         #pragma unroll_loop_start
         for ( int i = 0; i < NUM_DIR_LIGHT_SHADOWS; i ++ ) {
-      
-          directionalLight = directionalLightShadows[ i ];
-          shadow *= receiveShadow ? 0.5: 1.0;
-      
+          directionalLight = ${c.get(uniformDirectionalLightShadows)}[ i ];
+          shadowDir *= receiveShadow ? getShadow( ${directionalShadowMap}[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, ${vDirectionalShadowCoord}[ i ]) : 1.0;
         }
         #pragma unroll_loop_end
       
@@ -188,9 +302,9 @@ class ShadowMapNode extends FloatNode {
       
         #pragma unroll_loop_start
         for ( int i = 0; i < NUM_POINT_LIGHT_SHADOWS; i ++ ) {
-      
-          pointLight = pointLightShadows[ i ];
-          shadow *= receiveShadow ? getPointShadow( ${pointShadowMap}[ i ], pointLight.shadowMapSize, pointLight.shadowBias, pointLight.shadowRadius, vPointShadowCoord[ i ], pointLight.shadowCameraNear, pointLight.shadowCameraFar ) : 1.0;
+          pointLight = ${c.get(uniformPointLightShadows)}[ i ];
+          
+          //shadowPoint *= receiveShadow ? getPointShadow( ${pointShadowMap}[ i ], pointLight.shadowMapSize, pointLight.shadowBias, pointLight.shadowRadius, ${vPointShadowCoord}[ i ], pointLight.shadowCameraNear, pointLight.shadowCameraFar ) : 1.0;
       
         }
         #pragma unroll_loop_end
@@ -207,7 +321,7 @@ class ShadowMapNode extends FloatNode {
       
         #endif
       
-        return shadow;
+        return shadowDir;
       
       }
       vec3 inverseTransformDirection( in vec3 dir, in mat4 matrix ) {
@@ -220,7 +334,11 @@ class ShadowMapNode extends FloatNode {
       }
       `,
       chunk: `
-        float shadow_float_${k} = getShadowMask(${pointLightShadows}, ${vPointShadowCoord}, true);
+        #if NUM_DIR_LIGHT_SHADOWS > 0 || NUM_SPOT_LIGHT_SHADOWS > 0 || NUM_POINT_LIGHT_SHADOWS > 0
+          float shadow_float_${k} = getShadowMask(true);
+        #else
+          float shadow_float_${k} = 1.0;
+        #endif
       `,
       out: `shadow_float_${k}`
     }

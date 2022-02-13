@@ -1,14 +1,15 @@
 import * as THREE from 'three';
-import { Clock, Material, Mesh, MeshLambertMaterial, MeshStandardMaterial, PerspectiveCamera, PlaneGeometry, PointLight, SphereGeometry, Vector3, WebGLRenderer } from 'three';
+import { Clock, Material, Mesh, MeshLambertMaterial, MeshStandardMaterial, PerspectiveCamera, PlaneGeometry, PointLight, SphereGeometry, Vector3, WebGLRenderer, PCFShadowMap, Texture, WebGLRenderTarget } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { NodeShaderMaterial } from '../../src/index';
-import { float, rgb, uniformFloat } from '../../src/lib/dsl';
+import { attributes, NodeShaderMaterial } from '../../src/index';
+import { float, rgb, uniformFloat, varyingVec2 } from '../../src/lib/dsl';
 import { standardMaterial } from '../../src/lib/effects/physical';
 import { sin } from '../../src/lib/functions';
 import { translateY } from '../../src/lib/transformation/transforms';
 import { UniformFloatNode } from '../../src/lib/uniforms';
 import { lambertMaterial } from '../../src/lib/effects/lambert';
 import * as Stats from 'stats.js'
+import { uniformDirectionalShadowMap, uniformPointShadowMap } from '../../src/lib/lights';
 
 
 export function init() {
@@ -31,6 +32,7 @@ export function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(0, 1);
   renderer.shadowMap.enabled = true
+  renderer.shadowMap.type = PCFShadowMap
   outputContainer.appendChild(renderer.domElement);
 
   // camera setup
@@ -66,7 +68,7 @@ export function init() {
 
   const uniformTime = uniformFloat("time")
 
-  const material = new NodeShaderMaterial({
+  let material: Material = new NodeShaderMaterial({
     color: standardMaterial({ color: rgb(0x00ff00) }),
     transform: oscilate(uniformTime),
     uniforms: {
@@ -74,15 +76,23 @@ export function init() {
     }
   })
 
+  // At least one mesh standard material must exist in the scene or directional light does not update
+  material = new MeshStandardMaterial({ color: 0x00ff00 })
+
   const mesh = new Mesh(sphere, material)
   mesh.castShadow = true
   mesh.position.set(0, 0, 0)
   scene.add(mesh)
 
-  const pointlight = new PointLight()
+  const pointlight = new PointLight(null, 0.2)
   pointlight.position.set(10, 10, 5)
   pointlight.castShadow = true
   scene.add(pointlight)
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+  directionalLight.position.x = -0.5
+  directionalLight.castShadow = true
+  scene.add(directionalLight);
 
   const hemilight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.2);
   scene.add(hemilight);
@@ -91,7 +101,7 @@ export function init() {
 
   function render() {
     stats.begin()
-    material.uniforms.time.value = clock.getElapsedTime()
+    //material.uniforms.time.value = clock.getElapsedTime()
 
     renderer.render(scene, camera)
     stats.end()
@@ -108,10 +118,17 @@ function createPlane() {
   let material: Material;
   material = new NodeShaderMaterial({
     color: lambertMaterial(rgb(0xcccccc)),
+    //color: uniformDirectionalShadowMap.get(0).sample(varyingVec2(attributes.uv)),
     uniforms: {
       time: { value: 0 }
     }
   })
+  //material = new MeshLambertMaterial({ color: 0xcccccc })
+  /*material.onBeforeCompile = (shader) => {
+    console.log(shader.fragmentShader)
+    shader.fragmentShader += '34'
+  }*/
+
 
   const mesh = new Mesh(plane, material)
   mesh.receiveShadow = true

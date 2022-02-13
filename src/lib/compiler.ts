@@ -108,17 +108,22 @@ export class FragmentCompiler extends Compiler {
     let pars = `
       varying ${type} ${variable};
     `;
+    let assignmentChunk = `
+      ${variable} = ${out};
+    `
     if (arrayLimit != null) {
       const limit = this.vertexCompiler.get(arrayLimit);
       pars = `
         #if ${limit} > 0
           varying ${type} ${variable}[ ${limit} ];
         #endif`;
+      assignmentChunk = `
+        #if ${limit} > 0
+          ${assignmentChunk};
+        #endif`;
     }
     this.vertexCompiler.pars.push(pars);
-    this.vertexCompiler.chunks.push(`
-      ${variable} = ${out};
-    `);
+    this.vertexCompiler.chunks.push(assignmentChunk);
     this.pars.push(pars);
     return {
       out: variable,

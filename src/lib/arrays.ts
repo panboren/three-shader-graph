@@ -83,8 +83,8 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
 
         const limit = c.get(int(self.limit));
         const start = `
-          ${type.typeName} loop_map_${k}[${limit}];
           #if ${limit} > 0
+          ${type.typeName} loop_map_${k}[${limit}];
 
           for (int i = 0; i < ${limit}; ++i) {
         `;
@@ -104,6 +104,8 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
               ${blockResult.chunk ?? ''}
               loop_map_${k}[i] = ${blockResult.out};
             }
+            #else
+            ${type.typeName} loop_map_${k}[1];
             #endif
           `,
           out: `loop_map_${k}`,
