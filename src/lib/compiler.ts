@@ -1,3 +1,4 @@
+import { int } from '..';
 import { attributes, uniforms } from './common';
 import { uniformVec3, vec4 } from './dsl';
 import { FogNode } from './effects/fog';
@@ -98,7 +99,7 @@ export class FragmentCompiler extends Compiler {
   public defineVarying<T>(
     type: string,
     node: ShaderNode<T>,
-    arrayLimit: IntNode | null = null
+    arrayLimit: number | IntNode | null = null
   ): CompileResult<string> {
     const out = this.vertexCompiler.get(node);
     const k = this.vertexCompiler.variable();
@@ -112,7 +113,7 @@ export class FragmentCompiler extends Compiler {
       ${variable} = ${out};
     `
     if (arrayLimit != null) {
-      const limit = this.vertexCompiler.get(arrayLimit);
+      const limit = this.vertexCompiler.get(int(arrayLimit));
       pars = `
         #if ${limit} > 0
           varying ${type} ${variable}[ ${limit} ];

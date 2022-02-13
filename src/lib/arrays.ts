@@ -17,7 +17,7 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
 {
   constructor(protected readonly type: BaseType<T>) { }
 
-  protected abstract limit: IntNode | number;
+  public abstract limit: IntNode | number;
 
   public abstract compile(c: Compiler): CompileResult<string>;
 
@@ -91,20 +91,22 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
   }
 
   public map<R extends ShaderNode<string>>(
-    type: BaseType<R>,
+    returnType: BaseType<R>,
     block: (v: T, index: IntNode) => R
   ) {
     const self = this;
     const indexReference = new IntExpressionNode('i');
     // @ts-expect-error
-    return new (class extends type {
+    return new (class extends ArrayNode<R> {
+      protected readonly type = returnType
+      public readonly limit = self.limit
       public compile(c: Compiler) {
         const k = c.variable();
 
         const limit = c.get(int(self.limit));
         const start = `
           #if ${limit} > 0
-          ${type.typeName} loop_map_${k}[${limit}];
+          ${returnType.typeName} loop_map_${k}[${limit}];
 
           for (int i = 0; i < ${limit}; ++i) {
         `;
@@ -125,13 +127,13 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
               loop_map_${k}[i] = ${blockResult.out};
             }
             #else
-            ${type.typeName} loop_map_${k}[1];
+            ${returnType.typeName} loop_map_${k}[1];
             #endif
           `,
           out: `loop_map_${k}`,
         };
       }
-    })();
+    })() as ArrayNode<R>;
   }
 }
 // This is usefult to refer to existing uniforms that are predefined.
@@ -151,7 +153,7 @@ export class UniformArrayNode<
   constructor(
     private readonly name: string,
     protected readonly type: BaseType<T>,
-    protected readonly limit: IntNode | number
+    public readonly limit: IntNode | number
   ) {
     super(type);
   }
@@ -171,14 +173,15 @@ export class UniformArrayNode<
 export class VaryingArrayNode<
   T extends ShaderNode<string>
   > extends ArrayNode<T> {
+  public readonly limit = this.node.limit
+
   constructor(
-    private readonly node: T,
+    private readonly node: ArrayNode<T>,
     protected readonly type: BaseType<T>,
-    protected readonly limit: IntNode
   ) {
     super(type);
   }
   public compile(c: FragmentCompiler) {
-    return c.defineVarying(this.type.typeName, this.node, this.limit);
+    return c.defineVarying(this.type.typeName, this.node, this.node.limit);
   }
 }

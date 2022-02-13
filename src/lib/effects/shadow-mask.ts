@@ -23,7 +23,7 @@ export class ShadowMaskNode extends FloatNode {
       const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
       return uniformDirectionalShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
     })
-    const vDirectionalShadowCoord = c.get(new VaryingArrayNode(directionalShadowCoords, Vec4Node, new IntExpressionNode('NUM_DIR_LIGHT_SHADOWS')))
+    const vDirectionalShadowCoord = c.get(new VaryingArrayNode(directionalShadowCoords, Vec4Node))
 
     const spotLightShadows = c.get(uniformSpotLightShadows.map(SpotLightShadow, i => i))
     const spotShadowMap = c.get(uniformSpotShadowMap)
@@ -31,7 +31,7 @@ export class ShadowMaskNode extends FloatNode {
       const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
       return uniformSpotShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
     })
-    const vSpotShadowCoord = c.get(new VaryingArrayNode(spotShadowCoords, Vec4Node, new IntExpressionNode('NUM_SPOT_LIGHT_SHADOWS')))
+    const vSpotShadowCoord = c.get(new VaryingArrayNode(spotShadowCoords, Vec4Node))
 
     const pointLightShadows = c.get(uniformPointLightShadows.map(PointLightShadow, i => i))
     const pointShadowMap = c.get(uniformPointShadowMap)
@@ -39,7 +39,7 @@ export class ShadowMaskNode extends FloatNode {
       const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
       return uniformPointShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
     })
-    const vPointShadowCoord = c.get(new VaryingArrayNode(pointShadowCoords, Vec4Node, new IntExpressionNode('NUM_POINT_LIGHT_SHADOWS')))
+    const vPointShadowCoord = c.get(new VaryingArrayNode(pointShadowCoords, Vec4Node))
 
 
     return {
