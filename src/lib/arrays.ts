@@ -15,7 +15,7 @@ const variableExtractRx = /^\s*(?:(\w+)) (?=(\w+))/g
 export abstract class ArrayNode<T extends ShaderNode<string>>
   implements ShaderNode<string>
 {
-  constructor(protected readonly type: BaseType<T>) { }
+  constructor(public readonly type: BaseType<T>) { }
 
   public abstract limit: IntNode | number;
 
@@ -152,7 +152,7 @@ export class UniformArrayNode<
   > extends ArrayNode<T> {
   constructor(
     private readonly name: string,
-    protected readonly type: BaseType<T>,
+    public readonly type: BaseType<T>,
     public readonly limit: IntNode | number
   ) {
     super(type);
@@ -174,12 +174,10 @@ export class VaryingArrayNode<
   T extends ShaderNode<string>
   > extends ArrayNode<T> {
   public readonly limit = this.node.limit
+  public readonly type: BaseType<T> = this.node.type
 
-  constructor(
-    private readonly node: ArrayNode<T>,
-    protected readonly type: BaseType<T>,
-  ) {
-    super(type);
+  constructor(private readonly node: ArrayNode<T>) {
+    super(node.type);
   }
   public compile(c: FragmentCompiler) {
     return c.defineVarying(this.type.typeName, this.node, this.node.limit);

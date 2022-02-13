@@ -1,6 +1,6 @@
 import { VaryingArrayNode } from '../arrays';
 import { uniforms, attributes } from '../common';
-import { float, int, negVec3, rgb, rgba, varyingVec2, varyingVec3, vec3, vec4 } from '../dsl';
+import { float, int, negVec3, rgb, rgba, varyingVec2, varyingVec3, vec3, vec4, varyingArray } from '../dsl';
 import { IntExpressionNode } from '../expressions';
 import { dot, normalize, saturate } from '../functions';
 import { uniformPointLights, uniformDirectionalLights, uniformHemisphereLights, uniformSpotLights, uniformPointShadowMap, uniformPointLightShadows, uniformPointShadowMatrix, uniformDirectionalShadowMatrix, uniformDirectionalLightShadows, uniformDirectionalShadowMap, uniformSpotLightShadows, uniformSpotShadowMap, uniformSpotShadowMatrix } from '../lights';
@@ -33,7 +33,7 @@ function calculatePointLight(
     const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
     return uniformPointShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
   })
-  const vPointShadowCoord = new VaryingArrayNode(pointShadowCoords, Vec4Node)
+  const vPointShadowCoord = varyingArray(pointShadowCoords)
 
   const directDiffuse = uniformPointLights.sum(Vec3Node, (light, i) => {
 
@@ -64,7 +64,7 @@ function calculateSpotLight(
     const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
     return uniformSpotShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
   })
-  const vSpotShadowCoord = new VaryingArrayNode(spotShadowCoords, Vec4Node)
+  const vSpotShadowCoord = varyingArray(spotShadowCoords)
 
   const directDiffuse = uniformSpotLights.sum(Vec3Node, (light, i) => {
 
@@ -93,7 +93,7 @@ function calculateDirectionalLight(
     const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
     return uniformDirectionalShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
   })
-  const vDirectionalShadowCoord = new VaryingArrayNode(directionalShadowCoords, Vec4Node)
+  const vDirectionalShadowCoord = varyingArray(directionalShadowCoords)
 
   const directDiffuse = uniformDirectionalLights.sum(Vec3Node, (light, i) => {
 

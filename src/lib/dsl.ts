@@ -1,4 +1,7 @@
 import { ColorRepresentation, Vector2, Vector3, Vector4 } from 'three';
+import { VaryingArrayNode } from '..';
+import { ArrayNode } from './arrays';
+import { ShaderNode } from './compiler';
 import { getX, getY, getZ } from './helpers';
 import {
   BooleanNode,
@@ -90,6 +93,10 @@ export function varyingMat3(n: Mat3Node) {
 }
 export function varyingMat4(n: Mat4Node) {
   return new VaryingMat4Node(n);
+}
+
+export function varyingArray<T extends ShaderNode<string>>(node: ArrayNode<T>) {
+  return new VaryingArrayNode(node)
 }
 
 export function neg(f: FloatNode): FloatNode {

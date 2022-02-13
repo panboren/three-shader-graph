@@ -1,7 +1,7 @@
 import { normalize } from '../functions';
 import { PointLightShadow, uniformPointLightShadows, uniformPointShadowMap, uniformPointShadowMatrix, uniformDirectionalShadowMap, DirectionalLightShadow, uniformDirectionalLightShadows, uniformDirectionalShadowMatrix, SpotLightShadow, uniformSpotLightShadows, uniformSpotShadowMap, uniformSpotShadowMatrix, uniformSpotLights, SpotLight } from '../lights';
 import { transformed } from '../transformed';
-import { vec4 } from '../dsl';
+import { vec4, varyingArray } from '../dsl';
 import { FloatNode, Vec4Node } from '../types';
 import { Compiler } from '../compiler';
 import { VaryingArrayNode } from '../arrays';
@@ -23,7 +23,7 @@ export class ShadowMaskNode extends FloatNode {
       const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
       return uniformDirectionalShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
     })
-    const vDirectionalShadowCoord = c.get(new VaryingArrayNode(directionalShadowCoords, Vec4Node))
+    const vDirectionalShadowCoord = c.get(varyingArray(directionalShadowCoords))
 
     const spotLightShadows = c.get(uniformSpotLightShadows.map(SpotLightShadow, i => i))
     const spotShadowMap = c.get(uniformSpotShadowMap)
@@ -31,7 +31,7 @@ export class ShadowMaskNode extends FloatNode {
       const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
       return uniformSpotShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
     })
-    const vSpotShadowCoord = c.get(new VaryingArrayNode(spotShadowCoords, Vec4Node))
+    const vSpotShadowCoord = c.get(varyingArray(spotShadowCoords))
 
     const pointLightShadows = c.get(uniformPointLightShadows.map(PointLightShadow, i => i))
     const pointShadowMap = c.get(uniformPointShadowMap)
@@ -39,7 +39,7 @@ export class ShadowMaskNode extends FloatNode {
       const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
       return uniformPointShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
     })
-    const vPointShadowCoord = c.get(new VaryingArrayNode(pointShadowCoords, Vec4Node))
+    const vPointShadowCoord = c.get(varyingArray(pointShadowCoords))
 
 
     return {
