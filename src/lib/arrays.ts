@@ -9,6 +9,9 @@ import { IntExpressionNode } from './expressions';
 import { BaseType } from './nodes';
 import { IntNode } from './types';
 
+const variableRx = /^\s*(?:(\w+)) (?=\w+)/g
+const variableExtractRx = /^\s*(?:(\w+)) (?=(\w+))/g
+
 export abstract class ArrayNode<T extends ShaderNode<string>>
   implements ShaderNode<string>
 {
@@ -43,25 +46,42 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
         const start = `
           ${type.typeName} loop_sum_${k} = ${type.typeName}(0.0);
           #if ${limit} > 0
-
-          for (int i = 0; i < ${c.get(int(self.limit))}; ++i) {
+          //VARIABLES
+          #pragma unroll_loop_start
+          for ( int i = 0; i < ${c.get(int(self.limit))}; i ++ ) {
         `;
         // This is a hacky solution to ensure that the block does not append anything before this block does.
         // There should be a better way of wrapping another node in a chunk as it is now only supporting sequential appends.
         c.chunks.push(start);
 
+        const innerChunkStartIndex = c.chunks.length
+
         c.startScope();
-        const blockResult = block(
+        const blockResultOut = c.get(block(
           self.get(new IntExpressionNode('i')),
           indexReference
-        ).compile(c);
+        ));
         c.stopScope();
+
+
+        // This deals with extracting variables and declaring them before the loop
+        // starts so it can be unrolled without redefining variables
+        const variableDeclerations = c.chunks.slice(innerChunkStartIndex).map(chunk => {
+          return Array.from(chunk.matchAll(variableExtractRx)).map(m => {
+            return `${m[1]} ${m[2]};`
+          })
+        }).reduce((a, v) => a.concat(v)).join('\n')
+
+        c.chunks.slice(innerChunkStartIndex).forEach((innerChunk, i) => {
+          c.chunks[innerChunkStartIndex + i] = innerChunk.replace(variableRx, '')
+        })
+        c.chunks[innerChunkStartIndex - 1] = c.chunks[innerChunkStartIndex - 1].replace('//VARIABLES', variableDeclerations)
 
         return {
           chunk: `
-              ${blockResult.chunk ?? ''}
-              loop_sum_${k} += ${blockResult.out};
+              loop_sum_${k} += ${blockResultOut};
             }
+            #pragma unroll_loop_end
             #endif
           `,
           out: `loop_sum_${k}`,
