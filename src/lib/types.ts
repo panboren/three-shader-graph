@@ -453,6 +453,9 @@ export abstract class Vec3Node implements IVec3Node {
   public yz() {
     return new ComponentsVec2Node(getY(this), getZ(this));
   }
+  public zx() {
+    return new ComponentsVec2Node(getZ(this), getX(this));
+  }
 
   public rgb() {
     return new ComponentsRgbNode(this.x(), this.y(), this.z());
