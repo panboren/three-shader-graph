@@ -1,6 +1,4 @@
-import { Mat4Node } from './types';
 import { Compiler } from './compiler';
-import { identityTransform } from './transformation/transforms';
 import {
   Mat3ExpressionNode,
   Mat4ExpressionNode,
@@ -8,6 +6,8 @@ import {
   Vec3ExpressionNode,
   Vec4ExpressionNode,
 } from './expressions';
+import { identityTransform } from './transformation/transforms';
+import { Mat4Node } from './types';
 
 export const attributes = {
   position: new Vec3ExpressionNode('position'),
@@ -18,7 +18,7 @@ export const attributes = {
 class InstanceMatrixNode extends Mat4Node {
   public compile(c: Compiler) {
     const k = c.variable();
-    const identity = c.get(identityTransform)
+    const identity = c.get(identityTransform);
     return {
       chunk: `
         mat4 instanceMatrixOpt_${k} = ${identity};
@@ -26,8 +26,8 @@ class InstanceMatrixNode extends Mat4Node {
           instanceMatrixOpt_${k} = instanceMatrix;
         #endif
       `,
-      out: `instanceMatrixOpt_${k}`
-    }
+      out: `instanceMatrixOpt_${k}`,
+    };
   }
 }
 

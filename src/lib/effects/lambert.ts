@@ -1,22 +1,23 @@
-import {
-  negVec3,
-  rgba,
-  varyingVec3
-} from '../dsl';
+import { negVec3, rgba, varyingVec3 } from '../dsl';
 import { dot, normalize, saturate } from '../functions';
-import { PointLight, uniformAmbient, uniformDirectionalLights, uniformHemisphereLights, uniformPointLights, PointLightShadow, uniformPointLightShadows, uniformPointShadowMap, uniformPointShadowMatrix, uniformDirectionalShadowMap, DirectionalLightShadow, uniformDirectionalLightShadows, uniformDirectionalShadowMatrix, SpotLightShadow, uniformSpotLightShadows, uniformSpotShadowMap, uniformSpotShadowMatrix, uniformSpotLights, SpotLight } from '../lights';
-import { transformed } from '../transformed';
 import {
-  RgbaNode,
-  RgbNode,
-  Vec3Node
-} from '../types';
+  PointLight,
+  SpotLight,
+  uniformAmbient,
+  uniformDirectionalLights,
+  uniformHemisphereLights,
+  uniformPointLights,
+  uniformSpotLights,
+} from '../lights';
+import { transformed } from '../transformed';
+import { RgbaNode, RgbNode, Vec3Node } from '../types';
+
 import {
   BRDF_Lambert,
   Geometry,
   getDirectionalLightInfo,
   getHemisphereLightIrradiance,
-  getPointLightInfo
+  getPointLightInfo,
 } from './common-material';
 import { getSpotLightInfo } from './common-material';
 import { ShadowMaskNode } from './shadow-mask';
@@ -61,14 +62,18 @@ export function lambertMaterial(diffuse: RgbNode): RgbaNode {
   };
 
   const combinedPointLight = calculatePointLight(geometry);
-  const combinedSpotLight = calculateSpotLight(geometry)
+  const combinedSpotLight = calculateSpotLight(geometry);
   const combinedHemiLight = calculateHemisphereLight(geometry);
   const combinedDirLight = calculateDirLight(geometry);
 
-  const vLightFront = varyingVec3(combinedPointLight.add(combinedDirLight).add(combinedSpotLight));
+  const vLightFront = varyingVec3(
+    combinedPointLight.add(combinedDirLight).add(combinedSpotLight)
+  );
   const vIndirectFront = varyingVec3(combinedHemiLight.add(uniformAmbient));
 
-  const directDiffuse = vLightFront.multiply(BRDF_Lambert(diffuse)).multiplyScalar(new ShadowMaskNode());
+  const directDiffuse = vLightFront
+    .multiply(BRDF_Lambert(diffuse))
+    .multiplyScalar(new ShadowMaskNode());
   const indirectDiffuse = vIndirectFront.multiply(BRDF_Lambert(diffuse));
 
   const outgoingLight = directDiffuse.add(indirectDiffuse);

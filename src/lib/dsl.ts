@@ -1,11 +1,14 @@
 import { ColorRepresentation, Vector2, Vector3, Vector4 } from 'three';
+
 import { VaryingArrayNode } from '..';
+
 import { ArrayNode } from './arrays';
 import { ShaderNode } from './compiler';
 import { getX, getY, getZ } from './helpers';
 import {
   BooleanNode,
-  ComponentsRgbaNode, ComponentsVec4Node,
+  ComponentsRgbaNode,
+  ComponentsVec4Node,
   ConstantBooleanNode,
   ConstantFloatNode,
   ConstantIntNode,
@@ -14,7 +17,8 @@ import {
   ConstantVec2Node,
   ConstantVec3Node,
   ConstantVec4Node,
-  FloatNode, IntNode,
+  FloatNode,
+  IntNode,
   Mat2Node,
   Mat3Node,
   Mat4Node,
@@ -22,7 +26,7 @@ import {
   Sampler2DNode,
   Vec2Node,
   Vec3Node,
-  Vec4Node
+  Vec4Node,
 } from './types';
 import {
   UniformBoolNode,
@@ -33,7 +37,7 @@ import {
   UniformSampler2d,
   UniformVec2Node,
   UniformVec3Node,
-  UniformVec4Node
+  UniformVec4Node,
 } from './uniforms';
 import {
   VaryingFloatNode,
@@ -42,9 +46,8 @@ import {
   VaryingMat4Node,
   VaryingVec2Node,
   VaryingVec3Node,
-  VaryingVec4Node
+  VaryingVec4Node,
 } from './varying';
-
 
 export function uniformBool(name: string) {
   return new UniformBoolNode(name);
@@ -96,7 +99,7 @@ export function varyingMat4(n: Mat4Node) {
 }
 
 export function varyingArray<T extends ShaderNode<string>>(node: ArrayNode<T>) {
-  return new VaryingArrayNode(node)
+  return new VaryingArrayNode(node);
 }
 
 export function neg(f: FloatNode): FloatNode {

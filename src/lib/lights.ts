@@ -1,8 +1,15 @@
 import { UniformArrayNode } from './arrays';
-import { uniformVec3, uniformBool } from './dsl';
+import { uniformBool, uniformVec3 } from './dsl';
 import { IntExpressionNode } from './expressions';
 import { StructType } from './structs';
-import { FloatNode, Mat4Node, RgbNode, Sampler2DNode, Vec2Node, Vec3Node } from './types';
+import {
+  FloatNode,
+  Mat4Node,
+  RgbNode,
+  Sampler2DNode,
+  Vec2Node,
+  Vec3Node,
+} from './types';
 
 export abstract class PointLight extends StructType {
   static readonly typeName = 'PointLight';
@@ -22,7 +29,6 @@ export abstract class SpotLight extends StructType {
   readonly coneCos = this.get(FloatNode, 'coneCos');
   readonly penumbraCos = this.get(FloatNode, 'penumbraCos');
 }
-
 
 export abstract class HemisphereLight extends StructType {
   static readonly typeName = 'HemisphereLight';
@@ -64,7 +70,6 @@ export abstract class SpotLightShadow extends StructType {
 }
 
 export const lightProbe = new UniformArrayNode('lightProbe', Vec3Node, 9);
-
 
 export const uniformPointLights = new UniformArrayNode(
   'pointLights',
@@ -121,7 +126,6 @@ export const uniformDirectionalShadowMatrix = new UniformArrayNode(
   Mat4Node,
   new IntExpressionNode('NUM_DIR_LIGHT_SHADOWS')
 );
-
 
 export const uniformSpotLightShadows = new UniformArrayNode(
   'spotLightShadows',

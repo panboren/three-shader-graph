@@ -9,7 +9,7 @@ import {
   Mat4Node,
   Vec2Node,
   Vec3Node,
-  Vec4Node
+  Vec4Node,
 } from './types';
 
 // Find math functions here

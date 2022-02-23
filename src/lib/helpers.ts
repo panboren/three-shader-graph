@@ -12,7 +12,7 @@ export class SelectorNode<T> implements ShaderNode<string> {
   constructor(
     private readonly other: ShaderNode<T>,
     private readonly selector: (out: T) => string
-  ) { }
+  ) {}
   public compile(c: Compiler) {
     const o = this.other.compile(c);
     return {
@@ -24,9 +24,9 @@ export class SelectorNode<T> implements ShaderNode<string> {
 // This should probably be moved elsewhere
 export class Vec3ComponentsNode
   implements
-  ShaderNode<{ readonly x: string; readonly y: string; readonly z: string }>
+    ShaderNode<{ readonly x: string; readonly y: string; readonly z: string }>
 {
-  constructor(private readonly vec: IVec3Node) { }
+  constructor(private readonly vec: IVec3Node) {}
   public compile(c: Compiler) {
     const v = this.vec.compile(c);
     const k = c.variable();
@@ -94,7 +94,7 @@ export class AssignNode implements ShaderNode<string> {
   constructor(
     private readonly name: string,
     private readonly node: ShaderNode<string>
-  ) { }
+  ) {}
   public compile(c: Compiler) {
     const fc = c.get(this.node);
     return {

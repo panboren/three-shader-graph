@@ -1,7 +1,6 @@
 import { Compiler } from '../compiler';
 import { FloatNode, Sampler2DNode, Vec2Node, Vec4Node } from '../types';
 
-
 export class GetPointShadowNode extends FloatNode {
   constructor(
     private shadowMap: Sampler2DNode,
@@ -10,10 +9,11 @@ export class GetPointShadowNode extends FloatNode {
     private shadowRadius: FloatNode,
     private shadowCoord: Vec4Node,
     private shadowCameraNear: FloatNode,
-    private shadowCameraFar: FloatNode,
-  ) { super() }
+    private shadowCameraFar: FloatNode
+  ) {
+    super();
+  }
   public compile(c: Compiler) {
-
     return {
       pars: `
       #ifndef LIGHT_PARS
@@ -123,12 +123,15 @@ export class GetPointShadowNode extends FloatNode {
     
       }
       `,
-      out: `getPointShadow(${c.get(this.shadowMap)}, ${c.get(this.shadowMapSize)}, ${c.get(this.shadowBias)}, ${c.get(this.shadowRadius)}, ${c.get(this.shadowCoord)}, ${c.get(this.shadowCameraNear)}, ${c.get(this.shadowCameraFar)})`
-    }
+      out: `getPointShadow(${c.get(this.shadowMap)}, ${c.get(
+        this.shadowMapSize
+      )}, ${c.get(this.shadowBias)}, ${c.get(this.shadowRadius)}, ${c.get(
+        this.shadowCoord
+      )}, ${c.get(this.shadowCameraNear)}, ${c.get(this.shadowCameraFar)})`,
+    };
   }
-
 }
 
 /**
- * 
+ *
  */

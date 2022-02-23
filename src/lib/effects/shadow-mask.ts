@@ -1,49 +1,74 @@
-import { normalize } from '../functions';
-import { PointLightShadow, uniformPointLightShadows, uniformPointShadowMap, uniformPointShadowMatrix, uniformDirectionalShadowMap, DirectionalLightShadow, uniformDirectionalLightShadows, uniformDirectionalShadowMatrix, SpotLightShadow, uniformSpotLightShadows, uniformSpotShadowMap, uniformSpotShadowMatrix, uniformSpotLights, SpotLight } from '../lights';
-import { transformed } from '../transformed';
-import { vec4, varyingArray } from '../dsl';
-import { FloatNode, Vec4Node } from '../types';
-import { Compiler } from '../compiler';
-import { VaryingArrayNode } from '../arrays';
 import { uniforms } from '../common';
-import { IntExpressionNode } from '../expressions';
+import { Compiler } from '../compiler';
+import { varyingArray, vec4 } from '../dsl';
+import { normalize } from '../functions';
+import {
+  uniformDirectionalLightShadows,
+  uniformDirectionalShadowMap,
+  uniformDirectionalShadowMatrix,
+  uniformPointLightShadows,
+  uniformPointShadowMap,
+  uniformPointShadowMatrix,
+  uniformSpotLightShadows,
+  uniformSpotShadowMap,
+  uniformSpotShadowMatrix,
+} from '../lights';
+import { transformed } from '../transformed';
+import { FloatNode } from '../types';
 
 export class ShadowMaskNode extends FloatNode {
-  constructor() { super() }
+  constructor() {
+    super();
+  }
   public compile(c: Compiler) {
-    const k = c.variable()
-    const worldPosition = uniforms.modelMatrix.multiplyVec(transformed.position)
+    const k = c.variable();
+    const worldPosition = uniforms.modelMatrix.multiplyVec(
+      transformed.position
+    );
 
-    const shadowWorldNormal = normalize((vec4(transformed.normal, 0.0).multiplyMat(uniforms.viewMatrix)).xyz())
+    const shadowWorldNormal = normalize(
+      vec4(transformed.normal, 0.0).multiplyMat(uniforms.viewMatrix).xyz()
+    );
 
     // Need to reference the uniforms to ensure they are loaded
-    const directionalLightShadows = c.get(uniformDirectionalLightShadows.map(i => i))
-    const directionalShadowMap = c.get(uniformDirectionalShadowMap)
-    const directionalShadowCoords = uniformDirectionalLightShadows.map((p, i) => {
-      const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
-      return uniformDirectionalShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
-    })
-    const vDirectionalShadowCoord = c.get(varyingArray(directionalShadowCoords))
+    c.get(uniformDirectionalLightShadows.map((i) => i));
+    const directionalShadowMap = c.get(uniformDirectionalShadowMap);
+    const directionalShadowCoords = uniformDirectionalLightShadows.map(
+      (p, i) => {
+        const shadowWorldPosition = worldPosition.add(
+          vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0)
+        );
+        return uniformDirectionalShadowMatrix
+          .get(i)
+          .multiplyVec(shadowWorldPosition);
+      }
+    );
+    const vDirectionalShadowCoord = c.get(
+      varyingArray(directionalShadowCoords)
+    );
 
-    const spotLightShadows = c.get(uniformSpotLightShadows.map(i => i))
-    const spotShadowMap = c.get(uniformSpotShadowMap)
+    c.get(uniformSpotLightShadows.map((i) => i));
+    const spotShadowMap = c.get(uniformSpotShadowMap);
     const spotShadowCoords = uniformSpotLightShadows.map((p, i) => {
-      const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
-      return uniformSpotShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
-    })
-    const vSpotShadowCoord = c.get(varyingArray(spotShadowCoords))
+      const shadowWorldPosition = worldPosition.add(
+        vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0)
+      );
+      return uniformSpotShadowMatrix.get(i).multiplyVec(shadowWorldPosition);
+    });
+    const vSpotShadowCoord = c.get(varyingArray(spotShadowCoords));
 
-    const pointLightShadows = c.get(uniformPointLightShadows.map(i => i))
-    const pointShadowMap = c.get(uniformPointShadowMap)
+    c.get(uniformPointLightShadows.map((i) => i));
+    const pointShadowMap = c.get(uniformPointShadowMap);
     const pointShadowCoords = uniformPointLightShadows.map((p, i) => {
-      const shadowWorldPosition = worldPosition.add(vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0))
-      return uniformPointShadowMatrix.get(i).multiplyVec(shadowWorldPosition)
-    })
-    const vPointShadowCoord = c.get(varyingArray(pointShadowCoords))
-
+      const shadowWorldPosition = worldPosition.add(
+        vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0)
+      );
+      return uniformPointShadowMatrix.get(i).multiplyVec(shadowWorldPosition);
+    });
+    const vPointShadowCoord = c.get(varyingArray(pointShadowCoords));
 
     return {
-      'pars': `
+      pars: `
       const float UnpackDownscale = 255. / 256.; // 0..1 -> fraction (excluding 1)
 
       const vec3 PackFactors = vec3( 256. * 256. * 256., 256. * 256., 256. );
@@ -328,8 +353,7 @@ export class ShadowMaskNode extends FloatNode {
           float shadow_float_${k} = 1.0;
         #endif
       `,
-      out: `shadow_float_${k}`
-    }
+      out: `shadow_float_${k}`,
+    };
   }
-
 }

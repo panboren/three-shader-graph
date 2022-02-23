@@ -1,4 +1,5 @@
 import { int } from '..';
+
 import { attributes, uniforms } from './common';
 import { uniformVec3, vec4 } from './dsl';
 import { FogNode } from './effects/fog';
@@ -111,7 +112,7 @@ export class FragmentCompiler extends Compiler {
     `;
     let assignmentChunk = `
       ${variable} = ${out};
-    `
+    `;
     if (arrayLimit != null) {
       const limit = this.vertexCompiler.get(int(arrayLimit));
       pars = `
@@ -157,7 +158,7 @@ export class ShaderGraph {
       readonly color: IRgbaNode;
       readonly transform: Mat4Node;
     }
-  ) { }
+  ) {}
   public compile() {
     const uniformFogColor = uniformVec3('fogColor');
     const colorWithEncoding = new LinearToOutputTexelNode(this.out.color);

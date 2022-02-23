@@ -1,12 +1,7 @@
 import { attributes } from '../common';
 import { float, vec4 } from '../dsl';
 import { cos, normalize, sin } from '../functions';
-import {
-  ComponentsMat4Node,
-  FloatNode,
-  Vec3Node,
-  Vec4Node
-} from '../types';
+import { ComponentsMat4Node, FloatNode, Vec3Node, Vec4Node } from '../types';
 
 /*
 

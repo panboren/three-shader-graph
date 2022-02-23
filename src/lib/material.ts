@@ -31,7 +31,6 @@ type NodeShaderMaterialParameters = {
   readonly transparent?: boolean;
 };
 
-
 const nodeShaderMaterialDefaults = {
   color: rgba(0x000),
   transform: identityMat4,

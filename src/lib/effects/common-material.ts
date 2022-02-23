@@ -1,20 +1,21 @@
+import { bool, float, neg, uniformFloat, vec3 } from '../dsl';
 import {
-  bool,
-  float,
-  neg, uniformFloat, vec3
-} from '../dsl';
-import { dot, length, mix, normalize, pow, saturate, smoothstep } from '../functions';
+  dot,
+  length,
+  mix,
+  normalize,
+  pow,
+  saturate,
+  smoothstep,
+} from '../functions';
 import {
-  DirectionalLight, HemisphereLight,
+  DirectionalLight,
+  HemisphereLight,
   PointLight,
-  SpotLight
+  SpotLight,
 } from '../lights';
 import { select } from '../nodes';
-import {
-  BooleanNode,
-  FloatNode,
-  Vec3Node
-} from '../types';
+import { BooleanNode, FloatNode, Vec3Node } from '../types';
 
 export const uniformCameraNear = uniformFloat('cameraNear');
 export const uniformShadowFar = uniformFloat('shadowFar');
@@ -65,7 +66,11 @@ export function getPointLightInfo(
   };
 }
 
-function getSpotAttenuation(coneCosine: FloatNode, penumbraCosine: FloatNode, angleCosine: FloatNode) {
+function getSpotAttenuation(
+  coneCosine: FloatNode,
+  penumbraCosine: FloatNode,
+  angleCosine: FloatNode
+) {
   return smoothstep(coneCosine, penumbraCosine, angleCosine);
 }
 
@@ -74,23 +79,28 @@ export function getSpotLightInfo(
   geometry: Geometry
 ): IncidentLight {
   const lVector = spotLight.position.subtract(geometry.position);
-  const direction = normalize(lVector)
-  const angleCos = dot(direction, spotLight.direction)
-  const spotAttenuation = getSpotAttenuation(spotLight.coneCos, spotLight.penumbraCos, angleCos)
+  const direction = normalize(lVector);
+  const angleCos = dot(direction, spotLight.direction);
+  const spotAttenuation = getSpotAttenuation(
+    spotLight.coneCos,
+    spotLight.penumbraCos,
+    angleCos
+  );
   const lightDistance = length(lVector);
   const distanceAttenuation = getDistanceAttenuation(
     lightDistance,
     spotLight.distance,
     spotLight.decay
   );
-  const lightColor = spotLight.color.multiplyScalar(spotAttenuation).multiplyScalar(distanceAttenuation);
+  const lightColor = spotLight.color
+    .multiplyScalar(spotAttenuation)
+    .multiplyScalar(distanceAttenuation);
   return {
     direction,
     color: lightColor,
     visible: lightColor.notEquals(vec3(0, 0, 0)),
   };
 }
-
 
 export function getDirectionalLightInfo(
   directionalLight: DirectionalLight,

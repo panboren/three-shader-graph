@@ -9,13 +9,13 @@ import { IntExpressionNode } from './expressions';
 import { BaseType } from './nodes';
 import { IntNode } from './types';
 
-const variableRx = /^\s*(?:(\w+)) (?=\w+)/g
-const variableExtractRx = /^\s*(?:(\w+)) (?=(\w+))/g
+const variableRx = /^\s*(?:(\w+)) (?=\w+)/g;
+const variableExtractRx = /^\s*(?:(\w+)) (?=(\w+))/g;
 
 export abstract class ArrayNode<T extends ShaderNode<string>>
   implements ShaderNode<string>
 {
-  constructor(public readonly type: BaseType<T>) { }
+  constructor(public readonly type: BaseType<T>) {}
 
   public abstract limit: IntNode | number;
 
@@ -39,8 +39,8 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
     const blockReturn = block(
       self.get(new IntExpressionNode('i')),
       indexReference
-    )
-    const type = blockReturn.constructor as BaseType<R>
+    );
+    const type = blockReturn.constructor as BaseType<R>;
     // @ts-expect-error
     return new (class extends type {
       public compile(c: Compiler) {
@@ -58,25 +58,33 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
         // There should be a better way of wrapping another node in a chunk as it is now only supporting sequential appends.
         c.chunks.push(start);
 
-        const innerChunkStartIndex = c.chunks.length
+        const innerChunkStartIndex = c.chunks.length;
 
         c.startScope();
         const blockResultOut = c.get(blockReturn);
         c.stopScope();
 
-
         // This deals with extracting variables and declaring them before the loop
         // starts so it can be unrolled without redefining variables
-        const variableDeclerations = c.chunks.slice(innerChunkStartIndex).map(chunk => {
-          return Array.from(chunk.matchAll(variableExtractRx)).map(m => {
-            return `${m[1]} ${m[2]};`
+        const variableDeclerations = c.chunks
+          .slice(innerChunkStartIndex)
+          .map((chunk) => {
+            return Array.from(chunk.matchAll(variableExtractRx)).map((m) => {
+              return `${m[1]} ${m[2]};`;
+            });
           })
-        }).reduce((a, v) => a.concat(v)).join('\n')
+          .reduce((a, v) => a.concat(v))
+          .join('\n');
 
         c.chunks.slice(innerChunkStartIndex).forEach((innerChunk, i) => {
-          c.chunks[innerChunkStartIndex + i] = innerChunk.replace(variableRx, '')
-        })
-        c.chunks[innerChunkStartIndex - 1] = c.chunks[innerChunkStartIndex - 1].replace('//VARIABLES', variableDeclerations)
+          c.chunks[innerChunkStartIndex + i] = innerChunk.replace(
+            variableRx,
+            ''
+          );
+        });
+        c.chunks[innerChunkStartIndex - 1] = c.chunks[
+          innerChunkStartIndex - 1
+        ].replace('//VARIABLES', variableDeclerations);
 
         return {
           chunk: `
@@ -91,20 +99,15 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
     })();
   }
 
-  public map<R extends ShaderNode<string>>(
-    block: (v: T, index: IntNode) => R
-  ) {
+  public map<R extends ShaderNode<string>>(block: (v: T, index: IntNode) => R) {
     const self = this;
     const indexReference = new IntExpressionNode('i');
-    const blockReturn = block(
-      self.get(indexReference),
-      indexReference
-    )
-    const returnType = blockReturn.constructor as BaseType<R>
+    const blockReturn = block(self.get(indexReference), indexReference);
+    const returnType = blockReturn.constructor as BaseType<R>;
     // @ts-expect-error
     return new (class extends ArrayNode<R> {
-      protected readonly type = returnType
-      public readonly limit = self.limit
+      protected readonly type = returnType;
+      public readonly limit = self.limit;
       public compile(c: Compiler) {
         const k = c.variable();
 
@@ -151,7 +154,7 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
 // This will be needed in order to refer to arrays of lights. The limit will need to be defined by a constant.
 export class UniformArrayNode<
   T extends ShaderNode<string>
-  > extends ArrayNode<T> {
+> extends ArrayNode<T> {
   constructor(
     private readonly name: string,
     public readonly type: BaseType<T>,
@@ -174,11 +177,12 @@ export class UniformArrayNode<
 
 export class VaryingArrayNode<
   T extends ShaderNode<string>
-  > extends ArrayNode<T> {
-  public readonly limit = this.node.limit
-  public readonly type: BaseType<T> = this.node.type
-
-  constructor(private readonly node: ArrayNode<T>) {
+> extends ArrayNode<T> {
+  constructor(
+    private readonly node: ArrayNode<T>,
+    public readonly limit = node.limit,
+    public readonly type: BaseType<T> = node.type
+  ) {
     super(node.type);
   }
   public compile(c: FragmentCompiler) {

@@ -1,12 +1,8 @@
-import { getX, getY, getZ } from './helpers';
 import { attributes, uniforms } from './common';
 import { Mat4ExpressionNode } from './expressions';
 import { inverse, transpose } from './functions';
-import {
-  ComponentsVec4Node,
-  ConstantFloatNode,
-  Vec3Node,
-} from './types';
+import { getX, getY, getZ } from './helpers';
+import { ComponentsVec4Node, ConstantFloatNode, Vec3Node } from './types';
 
 const vertexTransform = new Mat4ExpressionNode('vertexTransform');
 const transformedVertex = vertexTransform.multiplyVec(

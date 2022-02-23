@@ -1,7 +1,6 @@
 import { Compiler } from '../compiler';
 import { FloatNode, Sampler2DNode, Vec2Node, Vec4Node } from '../types';
 
-
 export class GetShadowNode extends FloatNode {
   constructor(
     private shadowMap: Sampler2DNode,
@@ -9,7 +8,9 @@ export class GetShadowNode extends FloatNode {
     private shadowBias: FloatNode,
     private shadowRadius: FloatNode,
     private shadowCoord: Vec4Node
-  ) { super() }
+  ) {
+    super();
+  }
   public compile(c: Compiler) {
     return {
       pars: `
@@ -163,8 +164,11 @@ export class GetShadowNode extends FloatNode {
     
       }
       `,
-      out: `getShadow(${c.get(this.shadowMap)}, ${c.get(this.shadowMapSize)}, ${c.get(this.shadowBias)}, ${c.get(this.shadowRadius)}, ${c.get(this.shadowCoord)})`
-    }
+      out: `getShadow(${c.get(this.shadowMap)}, ${c.get(
+        this.shadowMapSize
+      )}, ${c.get(this.shadowBias)}, ${c.get(this.shadowRadius)}, ${c.get(
+        this.shadowCoord
+      )})`,
+    };
   }
-
 }

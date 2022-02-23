@@ -9,7 +9,7 @@ import {
   RgbNode,
   Vec2Node,
   Vec3Node,
-  Vec4Node
+  Vec4Node,
 } from './types';
 
 export class IntExpressionNode extends IntNode {
