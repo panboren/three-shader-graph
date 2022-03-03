@@ -68,7 +68,6 @@ export class Compiler {
       this.uniforms[_name] = { value }
       this.cachedUniforms.set(key, _name)
     }
-    console.log(this.uniforms)
     return {
       out: this.cachedUniforms.get(key) as string
     }
