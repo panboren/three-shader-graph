@@ -1,18 +1,14 @@
+import * as Stats from 'stats.js';
 import * as THREE from 'three';
-import { Clock, Material, Mesh, MeshLambertMaterial, MeshStandardMaterial, PerspectiveCamera, PlaneGeometry, PointLight, SphereGeometry, Vector3, WebGLRenderer, PCFShadowMap, Texture, WebGLRenderTarget, TextureLoader, RepeatWrapping } from 'three';
+import { Clock, Material, Mesh, MeshStandardMaterial, PCFShadowMap, PerspectiveCamera, PlaneGeometry, PointLight, RepeatWrapping, SphereGeometry, TextureLoader, Vector3, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { attributes, NodeShaderMaterial, Sampler2DNode, Vec3Node } from '../../src/index';
-import { float, rgb, uniformFloat, uniformSampler2d, varyingVec2, varyingVec3 } from '../../src/lib/dsl';
+import { attributes, NodeShaderMaterial } from '../../src/index';
+import { float, textureSampler2d, uniformFloat, varyingVec3, rgb } from '../../src/lib/dsl';
 import { standardMaterial } from '../../src/lib/effects/physical';
-import { abs, normalize, sin } from '../../src/lib/functions';
+import { triplanarMapping } from '../../src/lib/effects/triplannar-mapping';
+import { sin } from '../../src/lib/functions';
 import { translateY } from '../../src/lib/transformation/transforms';
 import { UniformFloatNode } from '../../src/lib/uniforms';
-import { lambertMaterial } from '../../src/lib/effects/lambert';
-import * as Stats from 'stats.js'
-import { uniformDirectionalShadowMap, uniformPointShadowMap } from '../../src/lib/lights';
-import { FloatNode, RgbNode } from '../../src/lib/types';
-import { transformed } from '../../src/lib/transformed';
-import { triplanarMapping } from '../../src/lib/effects/triplannar-mapping';
 
 export function init() {
   const bricksTexture = new TextureLoader().load('./assets/textures/bricks/Bricks075A_1K_Color.png')
@@ -74,24 +70,14 @@ export function init() {
 
   const uniformTime = uniformFloat("time")
 
-  const sampler = uniformSampler2d("map")
+  const sampler = textureSampler2d(bricksTexture)
 
-  //const color = rgb(0x00ff00)
-  //const textureCoord = varyingVec2(attributes.uv.multiplyScalar(float(4)));
-
-  //const textureCoord = varyingVec2(attributes.position.xy().multiplyScalar(float(0.2)));
-  //const color = sampler.sample(textureCoord).rgb()
   const color = triplanarMapping(sampler, varyingVec3(attributes.normal), varyingVec3(attributes.position), float(0.1)).rgb()
 
   let material = new NodeShaderMaterial({
     color: standardMaterial({ color }),
-    transform: oscilate(uniformTime),
-    uniforms: {
-      time: { value: 0 },
-      map: { value: bricksTexture }
-    }
+    transform: oscilate(uniformTime)
   })
-  material.uniforms.map.value = bricksTexture
 
   const mesh = new Mesh(sphere, material)
   mesh.castShadow = true

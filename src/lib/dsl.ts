@@ -1,4 +1,4 @@
-import { ColorRepresentation, Vector2, Vector3, Vector4 } from 'three';
+import { ColorRepresentation, Texture, Vector2, Vector3, Vector4, Matrix3, Matrix4 } from 'three';
 
 import { VaryingArrayNode } from '..';
 
@@ -49,32 +49,35 @@ import {
   VaryingVec4Node,
 } from './varying';
 
-export function uniformBool(name: string) {
-  return new UniformBoolNode(name);
+export function uniformBool(name: string, value: boolean = false) {
+  return new UniformBoolNode(name, value);
 }
-export function uniformFloat(name: string) {
-  return new UniformFloatNode(name);
+export function uniformFloat(name: string, value: number = 0) {
+  return new UniformFloatNode(name, value);
 }
-export function uniformVec2(name: string) {
-  return new UniformVec2Node(name);
+export function uniformVec2(name: string, value?: Vector2) {
+  return new UniformVec2Node(name, value);
 }
-export function uniformVec3(name: string) {
-  return new UniformVec3Node(name);
+export function uniformVec3(name: string, value?: Vector3) {
+  return new UniformVec3Node(name, value);
 }
-export function uniformVec4(name: string) {
-  return new UniformVec4Node(name);
+export function uniformVec4(name: string, value?: Vector4) {
+  return new UniformVec4Node(name, value);
 }
-export function uniformMat2(name: string) {
-  return new UniformMat2Node(name);
+export function uniformMat2(name: string, value?: any) {
+  return new UniformMat2Node(name, value);
 }
-export function uniformMat3(name: string) {
-  return new UniformMat3Node(name);
+export function uniformMat3(name: string, value?: Matrix3) {
+  return new UniformMat3Node(name, value);
 }
-export function uniformMat4(name: string) {
-  return new UniformMat4Node(name);
+export function uniformMat4(name: string, value?: Matrix4) {
+  return new UniformMat4Node(name, value);
 }
 export function uniformSampler2d(name: string) {
   return new UniformSampler2d(name);
+}
+export function textureSampler2d(texture: Texture) {
+  return new UniformSampler2d(null, texture)
 }
 export function varyingFloat(n: FloatNode): FloatNode {
   return new VaryingFloatNode(n);

@@ -1,7 +1,5 @@
-import { int } from '..';
-
 import { attributes, uniforms } from './common';
-import { uniformVec3, vec4 } from './dsl';
+import { uniformVec3, vec4, int } from './dsl';
 import { FogNode } from './effects/fog';
 import { AssignNode, LinearToOutputTexelNode } from './helpers';
 import { StructType } from './structs';
@@ -15,6 +13,7 @@ export class Compiler {
   >();
   public readonly pars: string[] = [];
   public readonly chunks: string[] = [];
+  public readonly uniforms: { [key: string]: { value: unknown } } = {}
   private inScope = false;
 
   private variableNumber = 0;
@@ -54,6 +53,25 @@ export class Compiler {
     // This is problemeatic if the result of a call ends up inside a scope.
     // could possibly solve this by ensuring that when you start a block, it will always append the chunk even though the node is being reused.
     return cache.get(node)?.out;
+  }
+
+  private cachedUniforms = new Map<unknown, string>();
+
+  public defineUniform(type: string, name: string | null, value?: unknown): CompileResult<string> {
+    const key = name ?? value
+    if (!this.cachedUniforms.has(key)) {
+      const _name = name ?? `u_${type}_${this.variable()}`
+
+      this.pars.push(`
+        uniform ${type} ${_name};
+      `)
+      this.uniforms[_name] = { value }
+      this.cachedUniforms.set(key, _name)
+    }
+    console.log(this.uniforms)
+    return {
+      out: this.cachedUniforms.get(key) as string
+    }
   }
 
   private registerStructDefinition(node: StructType) {
@@ -158,7 +176,7 @@ export class ShaderGraph {
       readonly color: IRgbaNode;
       readonly transform: Mat4Node;
     }
-  ) {}
+  ) { }
   public compile() {
     const uniformFogColor = uniformVec3('fogColor');
     const colorWithEncoding = new LinearToOutputTexelNode(this.out.color);
@@ -179,11 +197,19 @@ export class ShaderGraph {
     const compiler = new FragmentCompiler(vertexCompiler);
     compiler.get(new AssignNode('gl_FragColor', colorWithFog));
 
+
     const vertexShader = vertexCompiler.render();
     const fragmentShader = compiler.render();
+
+    const uniforms: { [key: string]: { value: unknown } } = {
+      ...vertexCompiler.uniforms,
+      ...compiler.uniforms
+    }
+
     return {
       vertexShader,
       fragmentShader,
+      uniforms
     };
   }
 }

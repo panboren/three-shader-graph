@@ -40,27 +40,32 @@ const nodeShaderMaterialDefaults = {
 
 export class NodeShaderMaterial extends ShaderMaterial {
   constructor(params: NodeShaderMaterialParameters) {
-    const paramsWithdDefaults = {
+    const paramsWithDefaults = {
       ...nodeShaderMaterialDefaults,
       ...params,
     };
 
     const shaders = new ShaderGraph({
-      color: paramsWithdDefaults.color,
-      transform: paramsWithdDefaults.transform,
+      color: paramsWithDefaults.color,
+      transform: paramsWithDefaults.transform,
     }).compile();
+
+    const uniforms = {
+      ...shaders.uniforms,
+      ...paramsWithDefaults.uniforms,
+      ...THREE.UniformsLib.fog,
+      ...THREE.UniformsLib.lights,
+    }
 
     super({
       fragmentShader: shaders.fragmentShader,
       vertexShader: shaders.vertexShader,
-      transparent: paramsWithdDefaults.transparent,
+      transparent: paramsWithDefaults.transparent,
       lights: true,
       fog: true, // Necessary for fog uniforms to be set based on fog set up on the scene.
-      uniforms: THREE.UniformsUtils.merge([
-        THREE.UniformsLib.fog,
-        THREE.UniformsLib.lights,
-        paramsWithdDefaults.uniforms,
-      ]),
+      uniforms
     });
+
+
   }
 }
