@@ -15,7 +15,7 @@ const variableExtractRx = /^\s*(?:(\w+)) (?=(\w+))/g;
 export abstract class ArrayNode<T extends ShaderNode<string>>
   implements ShaderNode<string>
 {
-  constructor(public readonly type: BaseType<T>) {}
+  constructor(public readonly type: BaseType<T>) { }
 
   public abstract limit: IntNode | number;
 
@@ -35,9 +35,9 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
     block: (v: T, index: IntNode) => R
   ) {
     const self = this;
-    const indexReference = new IntExpressionNode('i');
+    const indexReference = new IntExpressionNode('UNROLLED_LOOP_INDEX');
     const blockReturn = block(
-      self.get(new IntExpressionNode('i')),
+      self.get(indexReference),
       indexReference
     );
     const type = blockReturn.constructor as BaseType<R>;
@@ -154,7 +154,7 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
 // This will be needed in order to refer to arrays of lights. The limit will need to be defined by a constant.
 export class UniformArrayNode<
   T extends ShaderNode<string>
-> extends ArrayNode<T> {
+  > extends ArrayNode<T> {
   constructor(
     private readonly name: string,
     public readonly type: BaseType<T>,
@@ -177,7 +177,7 @@ export class UniformArrayNode<
 
 export class VaryingArrayNode<
   T extends ShaderNode<string>
-> extends ArrayNode<T> {
+  > extends ArrayNode<T> {
   constructor(
     private readonly node: ArrayNode<T>,
     public readonly limit = node.limit,

@@ -1,6 +1,7 @@
 import { uniforms } from '../common';
 import {
   float,
+  int,
   negVec3,
   rgb,
   rgba,
@@ -24,6 +25,7 @@ import {
   uniformSpotShadowMap,
   uniformSpotShadowMatrix,
 } from '../lights';
+import { selectPreCompile } from '../nodes';
 import { transformed } from '../transformed';
 import { FloatNode, RgbNode, Vec3Node } from '../types';
 
@@ -61,7 +63,8 @@ function calculatePointLight(
 
   const directDiffuse = uniformPointLights.sum((light, i) => {
     const pointLightShadow = uniformPointLightShadows.get(i);
-    const shadowFactor = new GetPointShadowNode(
+
+    const getShadowNode = new GetPointShadowNode(
       uniformPointShadowMap.get(i),
       pointLightShadow.shadowMapSize,
       pointLightShadow.shadowBias,
@@ -70,6 +73,10 @@ function calculatePointLight(
       pointLightShadow.shadowCameraNear,
       pointLightShadow.shadowCameraFar
     );
+    const shadowFactor = selectPreCompile(
+      int(uniformPointShadowMap.limit).gt(i),
+      getShadowNode,
+      float(1.0))
 
     const directLight = getPointLightInfo(light, geometry);
     const dotNL = saturate(dot(geometry.normal, directLight.direction));
@@ -95,13 +102,18 @@ function calculateSpotLight(
 
   const directDiffuse = uniformSpotLights.sum((light, i) => {
     const spotLightShadow = uniformSpotLightShadows.get(i);
-    const shadowFactor = new GetShadowNode(
+
+    const getShadowNode = new GetShadowNode(
       uniformSpotShadowMap.get(i),
       spotLightShadow.shadowMapSize,
       spotLightShadow.shadowBias,
       spotLightShadow.shadowRadius,
       vSpotShadowCoord.get(i)
-    );
+    )
+    const shadowFactor = selectPreCompile(
+      int(uniformSpotShadowMap.limit).gt(i),
+      getShadowNode,
+      float(1.0))
 
     const directLight = getSpotLightInfo(light, geometry);
     const dotNL = saturate(dot(geometry.normal, directLight.direction));
@@ -129,13 +141,18 @@ function calculateDirectionalLight(
 
   const directDiffuse = uniformDirectionalLights.sum((light, i) => {
     const directionalLightShadow = uniformDirectionalLightShadows.get(i);
-    const shadowFactor = new GetShadowNode(
+
+    const getShadowNode = new GetShadowNode(
       uniformDirectionalShadowMap.get(i),
       directionalLightShadow.shadowMapSize,
       directionalLightShadow.shadowBias,
       directionalLightShadow.shadowRadius,
       vDirectionalShadowCoord.get(i)
-    );
+    )
+    const shadowFactor = selectPreCompile(
+      int(uniformDirectionalShadowMap.limit).gt(i),
+      getShadowNode,
+      float(1.0))
 
     const directLight = getDirectionalLightInfo(light, geometry);
     const dotNL = saturate(dot(geometry.normal, directLight.direction));
