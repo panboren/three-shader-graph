@@ -17,5 +17,6 @@ export * from './lib/effects/lambert';
 export * from './lib/effects/physical';
 export * from './lib/effects/noise';
 export * from './lib/effects/triplannar-mapping';
+export * from './lib/effects/normal-mapping';
 export * from './lib/transformation/transforms';
 export * from './lib/transformation/rotate';

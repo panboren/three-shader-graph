@@ -6,7 +6,6 @@ import {
   rgb,
   rgba,
   varyingArray,
-  varyingVec3,
   vec4,
 } from '../dsl';
 import { dot, normalize, saturate } from '../functions';
@@ -26,7 +25,7 @@ import {
   uniformSpotShadowMatrix,
 } from '../lights';
 import { selectPreCompile } from '../nodes';
-import { transformed } from '../transformed';
+import { transformed, varyingTransformed } from '../transformed';
 import { FloatNode, RgbNode, Vec3Node } from '../types';
 
 import {
@@ -177,16 +176,18 @@ export type StandardMaterialParameters = {
   readonly color: RgbNode;
   readonly emissive: RgbNode;
   readonly emissiveIntensity: FloatNode;
+  readonly normal: Vec3Node | null;
 };
 
 const standardMaterialParametersDefaults: StandardMaterialParameters = {
   color: rgb(0x000000),
   emissive: rgb(0x000000),
   emissiveIntensity: float(1),
+  normal: varyingTransformed.normal
 };
 
 export function standardMaterial(params: Partial<StandardMaterialParameters>) {
-  const { color, emissive, emissiveIntensity } = {
+  const { color, emissive, emissiveIntensity, normal } = {
     ...standardMaterialParametersDefaults,
     ...params,
   };
@@ -195,11 +196,11 @@ export function standardMaterial(params: Partial<StandardMaterialParameters>) {
     diffuseColor: color,
   } as PhysicalMaterial;
 
-  const vPos = varyingVec3(transformed.mvPosition.xyz());
+  const vPos = varyingTransformed.mvPosition.xyz()
 
   const geometry = {
     position: vPos,
-    normal: varyingVec3(normalize(transformed.normal)),
+    normal: normal,
     viewDir: normalize(negVec3(vPos)),
   } as Geometry;
 

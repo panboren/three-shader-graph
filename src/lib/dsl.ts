@@ -5,6 +5,7 @@ import { VaryingArrayNode } from '..';
 import { ArrayNode } from './arrays';
 import { ShaderNode } from './compiler';
 import { getX, getY, getZ } from './helpers';
+import { ComponentsVec3Node } from './types';
 import {
   BooleanNode,
   ComponentsRgbaNode,
@@ -67,7 +68,7 @@ export function uniformVec4(name: string, value?: Vector4) {
 export function uniformMat2(name: string, value?: any) {
   return new UniformMat2Node(name, value);
 }
-export function uniformMat3(name: string, value?: Matrix3) {
+export function uniformMat3(name: string, value: Matrix3 = new Matrix3()) {
   return new UniformMat3Node(name, value);
 }
 export function uniformMat4(name: string, value?: Matrix4) {
@@ -173,16 +174,25 @@ export function vec2(
 }
 
 export function vec3(
-  x: number | Vector3 | Vector4 | Vec4Node,
-  y?: number,
-  z?: number
+  x: number | Vector3 | Vector4 | Vec3Node | Vec4Node | FloatNode,
+  y?: number | FloatNode,
+  z?: number | FloatNode
 ): Vec3Node {
-  if (x instanceof Vec4Node) {
+  if (x instanceof Vec3Node) {
+    return x
+  } else if (x instanceof Vec4Node) {
     return x.xyz();
-  } else if (typeof x === 'number') {
-    return new ConstantVec3Node(new Vector3(x, y, z));
+  } else if (
+    (typeof x === 'number' || x instanceof FloatNode) &&
+    (typeof y === 'number' || y instanceof FloatNode) &&
+    (typeof z === 'number' || z instanceof FloatNode)
+  ) {
+    return new ComponentsVec3Node(float(x), float(y), float(z));
+  } else if (x instanceof Vector3 || x instanceof Vector4) {
+    return new ConstantVec3Node(x);
+  } else {
+    throw new Error("Invalid arguments for vec3")
   }
-  return new ConstantVec3Node(x);
 }
 
 export function vec4(

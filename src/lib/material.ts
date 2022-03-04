@@ -1,9 +1,9 @@
 import { IUniform, ShaderMaterial } from 'three';
 import * as THREE from 'three';
 
-import { ShaderGraph } from './compiler';
 import { rgba } from './dsl';
 import { ConstantMat4Node, IRgbaNode, Mat4Node } from './types';
+import { ShaderGraph } from './shader-graph';
 
 const identityMat4 = new ConstantMat4Node(
   1,

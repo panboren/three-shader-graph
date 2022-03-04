@@ -278,6 +278,13 @@ export function dot<T extends FloatNode | Vec2Node | Vec3Node | Vec4Node>(
   return anyArgsFunction(FloatNode, 'dot', x, y);
 }
 
+export function cross<T extends FloatNode | Vec2Node | Vec3Node | Vec4Node>(
+  x: T,
+  y: T
+): T {
+  return anyArgsFunction(Object.getPrototypeOf(x).constructor, 'cross', x, y);
+}
+
 export function saturate<T extends FloatNode | Vec2Node | Vec3Node | Vec4Node>(
   a: T
 ): T {

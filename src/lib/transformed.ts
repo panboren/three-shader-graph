@@ -3,6 +3,7 @@ import { Mat4ExpressionNode } from './expressions';
 import { inverse, transpose } from './functions';
 import { getX, getY, getZ } from './helpers';
 import { ComponentsVec4Node, ConstantFloatNode, Vec3Node } from './types';
+import { VaryingVec4Node, VaryingVec3Node } from './varying';
 
 const vertexTransform = new Mat4ExpressionNode('vertexTransform');
 const transformedVertex = vertexTransform.multiplyVec(
@@ -18,6 +19,12 @@ export const transformed = {
       .xyz()
   ),
 };
+
+export const varyingTransformed = {
+  position: new VaryingVec4Node(transformed.position),
+  mvPosition: new VaryingVec4Node(transformed.mvPosition),
+  normal: new VaryingVec3Node(transformed.normal)
+}
 
 function vec3toVec4(v: Vec3Node) {
   return new ComponentsVec4Node(

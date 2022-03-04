@@ -1,9 +1,10 @@
 import * as Stats from 'stats.js';
 import * as THREE from 'three';
-import { Clock, Material, Mesh, MeshStandardMaterial, PCFShadowMap, PerspectiveCamera, PlaneGeometry, PointLight, RepeatWrapping, SphereGeometry, TextureLoader, Vector3, WebGLRenderer } from 'three';
+import { Clock, Material, Mesh, PCFShadowMap, PerspectiveCamera, PlaneGeometry, PointLight, RepeatWrapping, SphereGeometry, TextureLoader, Vector3, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { attributes, NodeShaderMaterial } from '../../src/index';
-import { float, textureSampler2d, uniformFloat, varyingVec3, rgb } from '../../src/lib/dsl';
+import { NodeShaderMaterial } from '../../src/index';
+import { float, rgb, textureSampler2d, uniformFloat } from '../../src/lib/dsl';
+import { colorToNormal } from '../../src/lib/effects/normal-mapping';
 import { standardMaterial } from '../../src/lib/effects/physical';
 import { triplanarMapping } from '../../src/lib/effects/triplannar-mapping';
 import { sin } from '../../src/lib/functions';
@@ -14,6 +15,10 @@ export function init() {
   const bricksTexture = new TextureLoader().load('./assets/textures/bricks/Bricks075A_1K_Color.png')
   bricksTexture.wrapS = RepeatWrapping
   bricksTexture.wrapT = RepeatWrapping
+
+  const bricksTextureNormal = new TextureLoader().load('./assets/textures/bricks/Bricks075A_1K_NormalGL.png')
+  bricksTextureNormal.wrapS = RepeatWrapping
+  bricksTextureNormal.wrapT = RepeatWrapping
 
   var stats = new Stats();
   stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -39,7 +44,7 @@ export function init() {
 
   // camera setup
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
-  camera.position.set(0, 15, 15);
+  camera.position.set(0, 7, 7);
   camera.far = 100;
   camera.lookAt(new Vector3(0, 0, 0))
   camera.updateProjectionMatrix();
@@ -71,13 +76,23 @@ export function init() {
   const uniformTime = uniformFloat("time")
 
   const sampler = textureSampler2d(bricksTexture)
+  const normalSampler = textureSampler2d(bricksTextureNormal)
 
-  const color = triplanarMapping(sampler, varyingVec3(attributes.normal), varyingVec3(attributes.position), float(0.1)).rgb()
+  const triplanarScale = float(0.15)
+
+  const color = triplanarMapping(sampler, triplanarScale).rgb()
+
+  const normalSample = triplanarMapping(normalSampler, triplanarScale).xyz();
+
+  const normal = colorToNormal(normalSample, 0.7)
 
   let material = new NodeShaderMaterial({
-    color: standardMaterial({ color }),
+    color: standardMaterial({ color, normal }),
     transform: oscilate(uniformTime)
   })
+
+  // If the attributes.tangent is used, tangents have to be manually computed on the geometry. 
+  sphere.computeTangents()
 
   const mesh = new Mesh(sphere, material)
   mesh.castShadow = true
