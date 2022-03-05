@@ -92,7 +92,7 @@ export function init() {
   })
 
   // If the attributes.tangent is used, tangents have to be manually computed on the geometry. 
-  sphere.computeTangents()
+  //sphere.computeTangents()
 
   const mesh = new Mesh(sphere, material)
   mesh.castShadow = true
