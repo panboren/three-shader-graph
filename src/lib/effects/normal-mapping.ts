@@ -1,5 +1,5 @@
 import { attributes, uniforms, varyingAttributes } from '../common';
-import { vec3, vec4, varyingVec3, float } from '../dsl';
+import { vec3, vec4, varyingVec3, float, varyingMat3 } from '../dsl';
 import { normalize, cross, dFdx, dFdy, max, dot, inversesqrt } from '../functions';
 import { select } from '../nodes';
 import { transformed, varyingTransformed } from '../transformed';
@@ -48,6 +48,38 @@ export function colorToNormalWithTangent(normalSample: Vec3Node | Vec4Node, norm
     vBitangent.x(), vBitangent.y(), vBitangent.z(),
     vNormal.x(), vNormal.y(), vNormal.z()
   )
+  const mapN = _normalSample.multiplyScalar(float(2)).subtractScalar(float(1))
+  const scaledMapN = mapN.multiply(vec3(normalScale, normalScale, float(1)))
+  return normalize(vTBN.multiplyVec(scaledMapN))
+}
+
+export function colorToNormalTriplanar(normalSample: Vec3Node | Vec4Node, normalScale: FloatNode | number) {
+  const _normalSample = vec3(normalSample)
+
+  const xtan = vec3(0, 0, 1);
+  const xbin = vec3(0, 1, 0);
+
+  const ytan = vec3(1, 0, 0);
+  const ybin = vec3(0, 0, 1);
+
+  const ztan = vec3(1, 0, 0);
+  const zbin = vec3(0, 1, 0);
+
+  const normalizedNormal0 = normalize(transformed.normal);
+  const normalizedNormal = normalizedNormal0.multiply(normalizedNormal0)
+
+  const worldBinormal0 = normalize(xbin.multiplyScalar(normalizedNormal.x()).add(ybin.multiplyScalar(normalizedNormal.y())).add(zbin.multiplyScalar(normalizedNormal.z())));
+  const worldTangent0 = normalize(xtan.multiplyScalar(normalizedNormal.x()).add(ytan.multiplyScalar(normalizedNormal.y())).add(ztan.multiplyScalar(normalizedNormal.z())));
+
+  const worldTangent = uniforms.modelMatrix.multiplyVec(vec4(worldTangent0, 0.0)).xyz();
+  const worldBinormal = uniforms.modelMatrix.multiplyVec(vec4(worldBinormal0, 0.0)).xyz();
+  const worldNormal = uniforms.modelMatrix.multiplyVec(vec4(normalize(transformed.normal), 0.0)).xyz();
+
+  const vTBN = varyingMat3(new ComponentsMat3Node(
+    worldTangent.x(), worldTangent.y(), worldTangent.z(),
+    worldBinormal.x(), worldBinormal.y(), worldBinormal.z(),
+    worldNormal.x(), worldNormal.y(), worldNormal.z()
+  ))
   const mapN = _normalSample.multiplyScalar(float(2)).subtractScalar(float(1))
   const scaledMapN = mapN.multiply(vec3(normalScale, normalScale, float(1)))
   return normalize(vTBN.multiplyVec(scaledMapN))

@@ -4,7 +4,7 @@ import { Clock, Material, Mesh, PCFShadowMap, PerspectiveCamera, PlaneGeometry, 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { NodeShaderMaterial } from '../../src/index';
 import { float, rgb, textureSampler2d, uniformFloat } from '../../src/lib/dsl';
-import { colorToNormal } from '../../src/lib/effects/normal-mapping';
+import { colorToNormalTriplanar } from '../../src/lib/effects/normal-mapping';
 import { standardMaterial } from '../../src/lib/effects/physical';
 import { triplanarMapping } from '../../src/lib/effects/triplannar-mapping';
 import { sin } from '../../src/lib/functions';
@@ -84,7 +84,7 @@ export function init() {
 
   const normalSample = triplanarMapping(normalSampler, triplanarScale).xyz();
 
-  const normal = colorToNormal(normalSample, 0.7)
+  const normal = colorToNormalTriplanar(normalSample, 0.7)
 
   let material = new NodeShaderMaterial({
     color: standardMaterial({ color, normal }),
@@ -156,7 +156,6 @@ function createPlane() {
     }
   })
   //material = new MeshStandardMaterial({ color: 0xcccccc })
-
 
   const mesh = new Mesh(plane, material)
   mesh.receiveShadow = true
