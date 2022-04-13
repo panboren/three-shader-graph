@@ -335,6 +335,28 @@ export function cross<T extends FloatNode | Vec2Node | Vec3Node | Vec4Node>(
   return anyArgsFunction(Object.getPrototypeOf(x).constructor, 'cross', x, y);
 }
 
+export function reflect<T extends Vec2Node | Vec3Node | Vec4Node>(
+  incident: T,
+  normal: T
+): T {
+  return anyArgsFunction(Object.getPrototypeOf(incident).constructor, 'reflect', incident, normal);
+}
+
+export function refract<T extends Vec2Node | Vec3Node | Vec4Node>(
+  incident: T,
+  normal: T,
+  eta: FloatNode
+): T {
+  return anyArgsFunction(Object.getPrototypeOf(incident).constructor, 'refract', incident, normal, eta);
+}
+
+export function mod<T extends FloatNode | Vec2Node | Vec3Node | Vec4Node, U extends T | FloatNode>(
+  x: T,
+  y: U
+): T {
+  return anyArgsFunction(Object.getPrototypeOf(x).constructor, 'mod', x, y);
+}
+
 export function saturate<T extends FloatNode | Vec2Node | Vec3Node | Vec4Node>(
   a: T
 ): T {

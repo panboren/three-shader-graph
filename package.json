@@ -1,6 +1,6 @@
 {
   "name": "three-shader-graph",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "Create GLSL shaders with typescript for Three.js",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",

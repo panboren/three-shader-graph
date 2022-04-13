@@ -620,6 +620,15 @@ export abstract class Vec4Node implements IVec4Node {
   public xy() {
     return new ComponentsVec2Node(getX(this), getY(this));
   }
+  public xz() {
+    return new ComponentsVec2Node(getX(this), getZ(this));
+  }
+  public yz() {
+    return new ComponentsVec2Node(getY(this), getZ(this));
+  }
+  public zx() {
+    return new ComponentsVec2Node(getZ(this), getX(this));
+  }
 
   public xyz() {
     return new ComponentsVec3Node(getX(this), getY(this), getZ(this));
@@ -1352,7 +1361,7 @@ export class RgbToRgbaNode implements IRgbaNode {
   constructor(
     private readonly rgb: RgbNode,
     private readonly alpha: IFloatNode
-  ) {}
+  ) { }
   public compile(c: Compiler) {
     const vec = c.get(this.rgb);
     const a = c.get(this.alpha);
@@ -1365,7 +1374,7 @@ export class RgbToRgbaNode implements IRgbaNode {
 }
 
 export class RgbaToRgbNode implements IRgbNode {
-  constructor(private readonly rgb: RgbaNode) {}
+  constructor(private readonly rgb: RgbaNode) { }
   public compile(c: Compiler) {
     const vec = c.get(this.rgb);
     const k = c.variable();
@@ -1509,14 +1518,14 @@ export class EqualsNode extends BooleanNode {
 
 function equals<
   T extends
-    | IntNode
-    | FloatNode
-    | Vec2Node
-    | Vec3Node
-    | Vec4Node
-    | Mat2Node
-    | Mat3Node
-    | Mat4Node
+  | IntNode
+  | FloatNode
+  | Vec2Node
+  | Vec3Node
+  | Vec4Node
+  | Mat2Node
+  | Mat3Node
+  | Mat4Node
 >(a: T, b: T): BooleanNode {
   return new (class extends BooleanNode {
     public compile(c: Compiler) {
@@ -1527,14 +1536,14 @@ function equals<
 
 function notEquals<
   T extends
-    | IntNode
-    | FloatNode
-    | Vec2Node
-    | Vec3Node
-    | Vec4Node
-    | Mat2Node
-    | Mat3Node
-    | Mat4Node
+  | IntNode
+  | FloatNode
+  | Vec2Node
+  | Vec3Node
+  | Vec4Node
+  | Mat2Node
+  | Mat3Node
+  | Mat4Node
 >(a: T, b: T): BooleanNode {
   return new (class extends BooleanNode {
     public compile(c: Compiler) {
@@ -1568,11 +1577,11 @@ export class Texture2dLookupNode extends RgbaNode {
       chunk:
         this.bias != null
           ? `vec4 texture_sample_${k} = texture2D(${sampler}, ${c.get(
-              this.cord
-            )}, ${c.get(this.bias)});`
+            this.cord
+          )}, ${c.get(this.bias)});`
           : `vec4 texture_sample_${k} = texture2D(${sampler}, ${c.get(
-              this.cord
-            )});`,
+            this.cord
+          )});`,
       out: `texture_sample_${k}`,
     };
   }
