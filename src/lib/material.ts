@@ -29,6 +29,7 @@ type NodeShaderMaterialParameters = {
   readonly transform?: Mat4Node;
   readonly uniforms?: { readonly [uniform: string]: IUniform };
   readonly transparent?: boolean;
+  readonly alphaTest?: number;
 };
 
 const nodeShaderMaterialDefaults = {
@@ -36,6 +37,7 @@ const nodeShaderMaterialDefaults = {
   transform: identityMat4,
   uniforms: {},
   transparent: false,
+  alphaTest: 0
 } as Required<NodeShaderMaterialParameters>;
 
 export class NodeShaderMaterial extends ShaderMaterial {
@@ -48,6 +50,8 @@ export class NodeShaderMaterial extends ShaderMaterial {
     const shaders = new ShaderGraph({
       color: paramsWithDefaults.color,
       transform: paramsWithDefaults.transform,
+    }, {
+      alphaTest: paramsWithDefaults.alphaTest
     }).compile();
 
     const uniforms = {

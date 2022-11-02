@@ -6,9 +6,9 @@ import { ComponentsVec4Node, ConstantFloatNode, Vec3Node } from './types';
 import { VaryingVec4Node, VaryingVec3Node } from './varying';
 
 const vertexTransform = new Mat4ExpressionNode('vertexTransform');
-const transformedVertex = vertexTransform.multiplyVec(
+const transformedVertex = uniforms.instanceMatrix.multiplyVec(vertexTransform.multiplyVec(
   vec3toVec4(attributes.position)
-);
+));
 
 export const transformed = {
   position: transformedVertex,

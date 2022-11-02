@@ -1,6 +1,7 @@
 import { int } from './dsl';
 import { StructType } from './structs';
 import { IntNode } from './types';
+import { ArrayNode } from './arrays';
 
 export class Compiler {
   private readonly cachedOuts = new Map<ShaderNode<any>, CompileResult<any>>();
@@ -31,6 +32,10 @@ export class Compiler {
   public get<T>(node: ShaderNode<T>): T {
     if (node instanceof StructType) {
       this.registerStructDefinition(node);
+    }
+    if (node instanceof ArrayNode && node.type.prototype instanceof StructType) {
+      // @ts-ignore
+      this.registerStructDefinition(new node.type)
     }
     const cache = this.inScope ? this.scopedCachedOuts : this.cachedOuts;
 

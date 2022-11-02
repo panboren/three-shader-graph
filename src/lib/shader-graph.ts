@@ -1,11 +1,21 @@
-import { Vec4Node, uniforms, IRgbaNode, Mat4Node, uniformVec3, LinearToOutputTexelNode, AssignNode, vec4, attributes } from "..";
+import { Vec4Node, uniforms, IRgbaNode, Mat4Node, uniformVec3, LinearToOutputTexelNode, AssignNode } from "..";
 import { Compiler, FragmentCompiler } from "./compiler";
+import { AlphaTestNode } from "./effects/alpha-test";
 import { FogNode } from "./effects/fog";
+import { transformed } from './transformed';
 
 export function outputPosition(position: Vec4Node) {
   return uniforms.projectionMatrix
     .multiply(uniforms.modelViewMatrix)
-    .multiplyVec(uniforms.instanceMatrix.multiplyVec(position));
+    .multiplyVec(position);
+}
+
+export interface ShaderGraphOptions {
+  alphaTest: number
+}
+
+const OptionDefaults = <ShaderGraphOptions>{
+  alphaTest: 0
 }
 
 export class ShaderGraph {
@@ -13,12 +23,14 @@ export class ShaderGraph {
     private readonly out: {
       readonly color: IRgbaNode;
       readonly transform: Mat4Node;
-    }
+    },
+    private options: ShaderGraphOptions = OptionDefaults
   ) { }
   public compile() {
     const uniformFogColor = uniformVec3('fogColor');
     const colorWithEncoding = new LinearToOutputTexelNode(this.out.color);
     const colorWithFog = new FogNode(colorWithEncoding, uniformFogColor);
+    const colorWithAlphaTest = new AlphaTestNode(colorWithFog, this.options.alphaTest)
 
     const vertexCompiler = new Compiler();
 
@@ -28,12 +40,11 @@ export class ShaderGraph {
     vertexCompiler.get(
       new AssignNode(
         'gl_Position',
-        outputPosition(transform.multiplyVec(vec4(attributes.position, 1)))
-      )
+        outputPosition(transformed.position))
     );
 
     const compiler = new FragmentCompiler(vertexCompiler);
-    compiler.get(new AssignNode('gl_FragColor', colorWithFog));
+    compiler.get(new AssignNode('gl_FragColor', colorWithAlphaTest));
 
 
     const vertexShader = vertexCompiler.render();
