@@ -1,6 +1,5 @@
 const path = require('path');
-const CopyPlugin = require("copy-webpack-plugin");
-
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './src/index.ts',
@@ -10,7 +9,7 @@ module.exports = {
       directory: path.join(__dirname, 'dist'),
     },
     compress: true,
-    port: 8080,
+    port: 8085,
   },
   module: {
     rules: [
@@ -32,8 +31,8 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: 'src/index.html', to: 'index.html' },
-        { from: 'src/assets', to: 'assets' }
-      ]
-    })
-  ]
+        { from: 'src/assets', to: 'assets' },
+      ],
+    }),
+  ],
 };
