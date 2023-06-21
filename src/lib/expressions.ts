@@ -1,5 +1,6 @@
 import { Compiler } from './compiler';
 import {
+  BooleanNode,
   FloatNode,
   IntNode,
   Mat2Node,
@@ -112,6 +113,18 @@ export class RgbExpression extends RgbNode {
 }
 
 export class RgbaExpression extends RgbaNode {
+  constructor(private readonly expr: string) {
+    super();
+  }
+  public compile(c: Compiler) {
+    return {
+      out: this.expr,
+    };
+  }
+}
+
+
+export class BooleanExpression extends BooleanNode {
   constructor(private readonly expr: string) {
     super();
   }

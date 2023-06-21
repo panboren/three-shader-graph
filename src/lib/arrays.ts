@@ -7,7 +7,7 @@ import {
 import { int } from './dsl';
 import { IntExpressionNode } from './expressions';
 import { BaseType } from './nodes';
-import { IntNode } from './types';
+import { BooleanNode, IntNode } from './types';
 
 const variableRx = /^\s*(?:(\w+)) (?=\w+)/g;
 const variableExtractRx = /^\s*(?:(\w+)) (?=(\w+))/g;
@@ -17,6 +17,8 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
 {
   constructor(public readonly type: BaseType<T>) { }
 
+
+  protected startIndex = 0;
   public abstract limit: IntNode | number;
 
   public abstract compile(c: Compiler): CompileResult<string>;
@@ -29,6 +31,21 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
         return { out: `${c.get(self)}[${c.get(int(i))}]` };
       }
     })();
+  }
+
+  protected abstract clone(): ArrayNode<T>
+
+  public slice(start: number, end: number): ArrayNode<T> {
+    const copy = this.clone()
+    copy.limit = copy.startIndex + end
+    copy.startIndex += start
+    return copy
+  }
+
+  public first(num: number) {
+    const copy = this.clone()
+    copy.limit = num
+    return copy
   }
 
   public sum<R extends ShaderNode<string> & { add(o: R): R }>(
@@ -173,6 +190,9 @@ export class UniformArrayNode<
       out: `${this.name}`,
     };
   }
+  protected clone() {
+    return new UniformArrayNode(this.name, this.type, this.limit)
+  }
 }
 
 export class VaryingArrayNode<
@@ -187,5 +207,8 @@ export class VaryingArrayNode<
   }
   public compile(c: FragmentCompiler) {
     return c.defineVarying(this.type.typeName, this.node, this.node.limit);
+  }
+  protected clone() {
+    return new VaryingArrayNode<T>(this.node, this.limit, this.type)
   }
 }

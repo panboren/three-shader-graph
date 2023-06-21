@@ -78,11 +78,24 @@ function selectPreCompileOfType<T extends ShaderNode<string>>(
     compile(c: Compiler) {
       const k = c.variable();
       const out = `select_out_${k}`;
+      // This scoping is the same hack used for arrays to ensure that code only gets added inside the body of the if statement
+      // if the condition is true. This is important to ensure that the preCompile can prevent code that will not compile from 
+      // being included
+  
+      c.chunks.push(`
+      ${type.typeName} ${out};
+      #if ${c.get(condition)}`)
+
+      c.startScope()
+      const blockResult = a.compile(c)
+      if (blockResult.pars != null && !c.pars.includes(blockResult.pars)) {
+        c.pars.push(blockResult.pars)
+      }
+      c.stopScope();
       return {
         chunk: `
-            ${type.typeName} ${out};
-            #if ${c.get(condition)}
-              ${out} = ${c.get(a)};
+              ${blockResult.chunk ?? ''}
+              ${out} = ${blockResult.out};
             #else
               ${out} = ${c.get(b)};
             #endif

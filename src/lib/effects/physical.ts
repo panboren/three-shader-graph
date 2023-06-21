@@ -1,3 +1,5 @@
+import { BooleanExpression, IntExpressionNode } from '../..';
+import { UniformArrayNode } from '../arrays';
 import { uniforms } from '../common';
 import {
   float,
@@ -6,27 +8,28 @@ import {
   rgb,
   rgba,
   varyingArray,
+  varyingFloat,
   vec4,
 } from '../dsl';
 import { dot, normalize, saturate } from '../functions';
 import {
-  uniformDirectionalLights,
   uniformDirectionalLightShadows,
+  uniformDirectionalLights,
   uniformDirectionalShadowMap,
   uniformDirectionalShadowMatrix,
   uniformHemisphereLights,
-  uniformPointLights,
   uniformPointLightShadows,
+  uniformPointLights,
   uniformPointShadowMap,
   uniformPointShadowMatrix,
-  uniformSpotLights,
   uniformSpotLightShadows,
+  uniformSpotLights,
   uniformSpotShadowMap,
   uniformSpotShadowMatrix,
 } from '../lights';
-import { selectPreCompile } from '../nodes';
+import { select, selectPreCompile } from '../nodes';
 import { transformed, varyingTransformed } from '../transformed';
-import { FloatNode, RgbNode, Vec3Node } from '../types';
+import { FloatNode, RgbNode, Vec2Node, Vec3Node } from '../types';
 
 import {
   BRDF_Lambert,
@@ -35,6 +38,8 @@ import {
   getHemisphereLightIrradiance,
   getPointLightInfo,
   getSpotLightInfo,
+  uniformCameraNear,
+  uniformShadowFar,
 } from './common-material';
 import { GetPointShadowNode } from './point-shadow';
 import { GetShadowNode } from './shadow';
@@ -75,7 +80,8 @@ function calculatePointLight(
     const shadowFactor = selectPreCompile(
       int(uniformPointShadowMap.limit).gt(i),
       getShadowNode,
-      float(1.0))
+      float(1.0)
+    );
 
     const directLight = getPointLightInfo(light, geometry);
     const dotNL = saturate(dot(geometry.normal, directLight.direction));
@@ -108,11 +114,12 @@ function calculateSpotLight(
       spotLightShadow.shadowBias,
       spotLightShadow.shadowRadius,
       vSpotShadowCoord.get(i)
-    )
+    );
     const shadowFactor = selectPreCompile(
       int(uniformSpotShadowMap.limit).gt(i),
       getShadowNode,
-      float(1.0))
+      float(1.0)
+    );
 
     const directLight = getSpotLightInfo(light, geometry);
     const dotNL = saturate(dot(geometry.normal, directLight.direction));
@@ -123,6 +130,15 @@ function calculateSpotLight(
   });
   return directDiffuse;
 }
+
+const linearDepth = varyingTransformed.mvPosition.z().multiply(float(-1)).divide(uniformShadowFar.subtract(uniformCameraNear));
+
+const CSM_CASCADES = new IntExpressionNode('CSM_CASCADES');
+const CSM_cascades = new UniformArrayNode(
+  'CSM_cascades',
+  Vec2Node,
+  CSM_CASCADES
+);
 
 function calculateDirectionalLight(
   geometry: Geometry,
@@ -141,24 +157,63 @@ function calculateDirectionalLight(
   const directDiffuse = uniformDirectionalLights.sum((light, i) => {
     const directionalLightShadow = uniformDirectionalLightShadows.get(i);
 
-    const getShadowNode = new GetShadowNode(
+    const getShadowNode: FloatNode = new GetShadowNode(
       uniformDirectionalShadowMap.get(i),
       directionalLightShadow.shadowMapSize,
       directionalLightShadow.shadowBias,
       directionalLightShadow.shadowRadius,
       vDirectionalShadowCoord.get(i)
-    )
+    );
+
+    const shadowsEnabled = int(uniformDirectionalShadowMap.limit).gt(i);
+
+    // If it is not a CSM light, always apply the light and shadow
+    // If it is a CSM light, only apply light and shadwos under certain conditions.
+    // This check has to be done pre compile though.
+    const isCsmLight = i.lt(CSM_CASCADES);
+
+    const getShadowNodeWithCsm: FloatNode = 
+        selectPreCompile(
+          isCsmLight,
+          select(
+            linearDepth
+              .gte(CSM_cascades.get(i).x())
+              .and(linearDepth.lt(CSM_cascades.get(i).y())),
+            getShadowNode,
+            float(1.0)
+          ),
+          getShadowNode
+        )
+
     const shadowFactor = selectPreCompile(
-      int(uniformDirectionalShadowMap.limit).gt(i),
-      getShadowNode,
-      float(1.0))
+      shadowsEnabled,
+      getShadowNodeWithCsm,
+      float(1.0)
+    );
 
     const directLight = getDirectionalLightInfo(light, geometry);
     const dotNL = saturate(dot(geometry.normal, directLight.direction));
     const irradiance = dotNL.multiplyVec3(light.color);
     return irradiance
       .multiply(BRDF_Lambert(material.diffuseColor))
-      .multiplyScalar(shadowFactor);
+      .multiplyScalar(shadowFactor)
+      .multiplyScalar(
+        selectPreCompile(
+          isCsmLight,
+          select(
+            linearDepth
+              .gte(CSM_cascades.get(i).x())
+              .and(
+                linearDepth
+                  .lt(CSM_cascades.get(i).y())
+                  .or(i.equals(CSM_CASCADES.subtract(int(1))))
+              ),
+            float(1.0),
+            float(0.0)
+          ),
+          float(1.0)
+        )
+      );
   });
   return directDiffuse;
 }
@@ -183,7 +238,7 @@ const standardMaterialParametersDefaults: StandardMaterialParameters = {
   color: rgb(0x000000),
   emissive: rgb(0x000000),
   emissiveIntensity: float(1),
-  normal: varyingTransformed.normal
+  normal: varyingTransformed.normal,
 };
 
 export function standardMaterial(params: Partial<StandardMaterialParameters>) {
@@ -196,7 +251,7 @@ export function standardMaterial(params: Partial<StandardMaterialParameters>) {
     diffuseColor: color,
   } as PhysicalMaterial;
 
-  const vPos = varyingTransformed.mvPosition.xyz()
+  const vPos = varyingTransformed.mvPosition.xyz();
 
   const geometry = {
     position: vPos,

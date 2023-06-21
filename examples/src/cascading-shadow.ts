@@ -1,36 +1,24 @@
+import * as Stats from 'stats.js';
 import * as THREE from 'three';
 import {
   Clock,
+  InstancedMesh,
   Material,
+  Matrix4,
   Mesh,
-  MeshLambertMaterial,
-  MeshStandardMaterial,
+  PCFShadowMap,
   PerspectiveCamera,
   PlaneGeometry,
   PointLight,
   SphereGeometry,
   Vector3,
-  WebGLRenderer,
-  PCFShadowMap,
-  Texture,
-  WebGLRenderTarget,
-  InstancedMesh,
-  Matrix4,
+  WebGLRenderer
 } from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { attributes, NodeShaderMaterial } from '../../src/index';
-import { float, rgb, uniformFloat, varyingVec2 } from '../../src/lib/dsl';
-import { standardMaterial } from '../../src/lib/effects/physical';
-import { sin } from '../../src/lib/functions';
-import { translateY } from '../../src/lib/transformation/transforms';
-import { UniformFloatNode } from '../../src/lib/uniforms';
-import { lambertMaterial } from '../../src/lib/effects/lambert';
-import * as Stats from 'stats.js';
-import {
-  uniformDirectionalShadowMap,
-  uniformPointShadowMap,
-} from '../../src/lib/lights';
 import CSM from 'three-csm';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { NodeShaderMaterial } from '../../src/index';
+import { rgb, uniformFloat } from '../../src/lib/dsl';
+import { standardMaterial } from '../../src/lib/effects/physical';
 
 export function init() {
   var stats = new Stats();
@@ -61,7 +49,7 @@ export function init() {
     50
   );
   camera.position.set(0, 15, 15);
-  camera.far = 500;
+  camera.far = 200;
   camera.lookAt(new Vector3(0, 0, 0));
   camera.updateProjectionMatrix();
 
@@ -125,6 +113,7 @@ export function init() {
   let csm = new CSM({
     maxFar: camera.far,
     cascades: 4,
+    mode: 'practical',
     shadowMapSize: 1024,
     lightDirection: new THREE.Vector3(1, -1, 1).normalize(),
     camera: camera,
