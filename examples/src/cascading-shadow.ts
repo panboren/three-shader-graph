@@ -16,7 +16,7 @@ import {
 } from 'three';
 import CSM from 'three-csm';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { NodeShaderMaterial } from '../../src/index';
+import { NodeShaderMaterial, lambertMaterial } from '../../src/index';
 import { rgb, uniformFloat } from '../../src/lib/dsl';
 import { standardMaterial } from '../../src/lib/effects/physical';
 
@@ -74,8 +74,6 @@ export function init() {
 
   const sphere = new SphereGeometry(5, 30, 15);
 
-  const uniformTime = uniformFloat('time');
-
   let material = new NodeShaderMaterial({
     color: standardMaterial({ color: rgb(0x00ff00) }),
 
@@ -95,20 +93,6 @@ export function init() {
   mesh.castShadow = true;
   mesh.position.set(0, 0, 0);
   scene.add(mesh);
-
-  const pointlight = new PointLight(null, 0.2);
-  pointlight.position.set(10, 10, 5);
-  pointlight.castShadow = true;
-  //scene.add(pointlight);
-
-  // TODO Replace the directional light with CSM
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
-  directionalLight.position.x = -0.5;
-  directionalLight.castShadow = true;
-  //scene.add(directionalLight);
-
-  const hemilight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.2);
-  //scene.add(hemilight);
 
   let csm = new CSM({
     maxFar: camera.far,
@@ -145,6 +129,7 @@ function createPlane() {
   let material: Material;
   material = new NodeShaderMaterial({
     color: standardMaterial({ color: rgb(0xcccccc) }),
+    //color: lambertMaterial(rgb(0xcccccc)),
     uniforms: {
       time: { value: 0 },
     },
