@@ -41,7 +41,7 @@
     "node": ">=10"
   },
   "peerDependencies": {
-    "three": ">=0.132.2"
+    "three": ">=0.138.3"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
