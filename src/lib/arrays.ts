@@ -7,7 +7,7 @@ import {
 import { int } from './dsl';
 import { IntExpressionNode } from './expressions';
 import { BaseType } from './nodes';
-import { BooleanNode, IntNode } from './types';
+import { IntNode } from './types';
 
 const variableRx = /^\s*(?:(\w+)) (?=\w+)/g;
 const variableExtractRx = /^\s*(?:(\w+)) (?=(\w+))/g;
@@ -15,8 +15,7 @@ const variableExtractRx = /^\s*(?:(\w+)) (?=(\w+))/g;
 export abstract class ArrayNode<T extends ShaderNode<string>>
   implements ShaderNode<string>
 {
-  constructor(public readonly type: BaseType<T>) { }
-
+  constructor(public readonly type: BaseType<T>) {}
 
   protected startIndex = 0;
   public abstract limit: IntNode | number;
@@ -33,19 +32,19 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
     })();
   }
 
-  protected abstract clone(): ArrayNode<T>
+  protected abstract clone(): ArrayNode<T>;
 
   public slice(start: number, end: number): ArrayNode<T> {
-    const copy = this.clone()
-    copy.limit = copy.startIndex + end
-    copy.startIndex += start
-    return copy
+    const copy = this.clone();
+    copy.limit = copy.startIndex + end;
+    copy.startIndex += start;
+    return copy;
   }
 
   public first(num: number) {
-    const copy = this.clone()
-    copy.limit = num
-    return copy
+    const copy = this.clone();
+    copy.limit = num;
+    return copy;
   }
 
   public sum<R extends ShaderNode<string> & { add(o: R): R }>(
@@ -53,10 +52,7 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
   ) {
     const self = this;
     const indexReference = new IntExpressionNode('UNROLLED_LOOP_INDEX');
-    const blockReturn = block(
-      self.get(indexReference),
-      indexReference
-    );
+    const blockReturn = block(self.get(indexReference), indexReference);
     const type = blockReturn.constructor as BaseType<R>;
     // @ts-expect-error
     return new (class extends type {
@@ -171,7 +167,7 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
 // This will be needed in order to refer to arrays of lights. The limit will need to be defined by a constant.
 export class UniformArrayNode<
   T extends ShaderNode<string>
-  > extends ArrayNode<T> {
+> extends ArrayNode<T> {
   constructor(
     private readonly name: string,
     public readonly type: BaseType<T>,
@@ -191,13 +187,13 @@ export class UniformArrayNode<
     };
   }
   protected clone() {
-    return new UniformArrayNode(this.name, this.type, this.limit)
+    return new UniformArrayNode(this.name, this.type, this.limit);
   }
 }
 
 export class VaryingArrayNode<
   T extends ShaderNode<string>
-  > extends ArrayNode<T> {
+> extends ArrayNode<T> {
   constructor(
     private readonly node: ArrayNode<T>,
     public readonly limit = node.limit,
@@ -209,6 +205,6 @@ export class VaryingArrayNode<
     return c.defineVarying(this.type.typeName, this.node, this.node.limit);
   }
   protected clone() {
-    return new VaryingArrayNode<T>(this.node, this.limit, this.type)
+    return new VaryingArrayNode<T>(this.node, this.limit, this.type);
   }
 }

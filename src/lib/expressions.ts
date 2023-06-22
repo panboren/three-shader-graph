@@ -123,7 +123,6 @@ export class RgbaExpression extends RgbaNode {
   }
 }
 
-
 export class BooleanExpression extends BooleanNode {
   constructor(private readonly expr: string) {
     super();

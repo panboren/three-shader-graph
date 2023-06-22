@@ -1,5 +1,3 @@
-import { BooleanExpression, IntExpressionNode } from '../..';
-import { UniformArrayNode } from '../arrays';
 import { uniforms } from '../common';
 import {
   float,
@@ -8,28 +6,27 @@ import {
   rgb,
   rgba,
   varyingArray,
-  varyingFloat,
   vec4,
 } from '../dsl';
 import { dot, normalize, saturate } from '../functions';
 import {
-  uniformDirectionalLightShadows,
   uniformDirectionalLights,
+  uniformDirectionalLightShadows,
   uniformDirectionalShadowMap,
   uniformDirectionalShadowMatrix,
   uniformHemisphereLights,
-  uniformPointLightShadows,
   uniformPointLights,
+  uniformPointLightShadows,
   uniformPointShadowMap,
   uniformPointShadowMatrix,
-  uniformSpotLightShadows,
   uniformSpotLights,
+  uniformSpotLightShadows,
   uniformSpotShadowMap,
   uniformSpotShadowMatrix,
 } from '../lights';
-import { select, selectPreCompile } from '../nodes';
+import { selectPreCompile } from '../nodes';
 import { transformed, varyingTransformed } from '../transformed';
-import { FloatNode, RgbNode, Vec2Node, Vec3Node } from '../types';
+import { FloatNode, RgbNode, Vec3Node } from '../types';
 
 import {
   BRDF_Lambert,
@@ -38,12 +35,10 @@ import {
   getHemisphereLightIrradiance,
   getPointLightInfo,
   getSpotLightInfo,
-  uniformCameraNear,
-  uniformShadowFar,
 } from './common-material';
+import { CSM_LightFactor, CSM_ShadowSelector } from './csm-util';
 import { GetPointShadowNode } from './point-shadow';
 import { GetShadowNode } from './shadow';
-import { CSM_LightFactor, CSM_ShadowSelector } from './csm-util'
 
 type PhysicalMaterial = {
   readonly diffuseColor: RgbNode;
@@ -132,15 +127,6 @@ function calculateSpotLight(
   return directDiffuse;
 }
 
-const linearDepth = varyingTransformed.mvPosition.z().multiply(float(-1)).divide(uniformShadowFar.subtract(uniformCameraNear));
-
-const CSM_CASCADES = new IntExpressionNode('CSM_CASCADES');
-const CSM_cascades = new UniformArrayNode(
-  'CSM_cascades',
-  Vec2Node,
-  CSM_CASCADES
-);
-
 function calculateDirectionalLight(
   geometry: Geometry,
   material: PhysicalMaterial
@@ -171,7 +157,10 @@ function calculateDirectionalLight(
     // If it is not a CSM light, always apply the light and shadow
     // If it is a CSM light, only apply light and shadwos under certain conditions.
     // This check has to be done pre compile though.
-    const getShadowNodeWithCsm: FloatNode = CSM_ShadowSelector(i, getShadowNode)
+    const getShadowNodeWithCsm: FloatNode = CSM_ShadowSelector(
+      i,
+      getShadowNode
+    );
 
     const shadowFactor = selectPreCompile(
       shadowsEnabled,
@@ -185,9 +174,7 @@ function calculateDirectionalLight(
     return irradiance
       .multiply(BRDF_Lambert(material.diffuseColor))
       .multiplyScalar(shadowFactor)
-      .multiplyScalar(
-        CSM_LightFactor(i)
-      );
+      .multiplyScalar(CSM_LightFactor(i));
   });
   return directDiffuse;
 }

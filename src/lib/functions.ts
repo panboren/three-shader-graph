@@ -196,15 +196,15 @@ export function dFdy<T extends FloatNode | Vec2Node | Vec3Node | Vec4Node>(
   return unaryFunction('dFdy', x);
 }
 
-export function dFdxCoarse<T extends FloatNode | Vec2Node | Vec3Node | Vec4Node>(
-  x: T
-): T {
+export function dFdxCoarse<
+  T extends FloatNode | Vec2Node | Vec3Node | Vec4Node
+>(x: T): T {
   return unaryFunction('dFdxCoarse', x);
 }
 
-export function dFdyCoarse<T extends FloatNode | Vec2Node | Vec3Node | Vec4Node>(
-  x: T
-): T {
+export function dFdyCoarse<
+  T extends FloatNode | Vec2Node | Vec3Node | Vec4Node
+>(x: T): T {
   return unaryFunction('dFdyCoarse', x);
 }
 
@@ -339,7 +339,12 @@ export function reflect<T extends Vec2Node | Vec3Node | Vec4Node>(
   incident: T,
   normal: T
 ): T {
-  return anyArgsFunction(Object.getPrototypeOf(incident).constructor, 'reflect', incident, normal);
+  return anyArgsFunction(
+    Object.getPrototypeOf(incident).constructor,
+    'reflect',
+    incident,
+    normal
+  );
 }
 
 export function refract<T extends Vec2Node | Vec3Node | Vec4Node>(
@@ -347,13 +352,19 @@ export function refract<T extends Vec2Node | Vec3Node | Vec4Node>(
   normal: T,
   eta: FloatNode
 ): T {
-  return anyArgsFunction(Object.getPrototypeOf(incident).constructor, 'refract', incident, normal, eta);
+  return anyArgsFunction(
+    Object.getPrototypeOf(incident).constructor,
+    'refract',
+    incident,
+    normal,
+    eta
+  );
 }
 
-export function mod<T extends FloatNode | Vec2Node | Vec3Node | Vec4Node, U extends T | FloatNode>(
-  x: T,
-  y: U
-): T {
+export function mod<
+  T extends FloatNode | Vec2Node | Vec3Node | Vec4Node,
+  U extends T | FloatNode
+>(x: T, y: U): T {
   return anyArgsFunction(Object.getPrototypeOf(x).constructor, 'mod', x, y);
 }
 

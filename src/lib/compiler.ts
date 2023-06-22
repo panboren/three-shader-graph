@@ -1,7 +1,7 @@
+import { ArrayNode } from './arrays';
 import { int } from './dsl';
 import { StructType } from './structs';
 import { IntNode } from './types';
-import { ArrayNode } from './arrays';
 
 export class Compiler {
   private readonly cachedOuts = new Map<ShaderNode<any>, CompileResult<any>>();
@@ -11,7 +11,7 @@ export class Compiler {
   >();
   public readonly pars: string[] = [];
   public readonly chunks: string[] = [];
-  public readonly uniforms: { [key: string]: { value: unknown } } = {}
+  public readonly uniforms: { [key: string]: { value: unknown } } = {};
   private inScope = false;
 
   private variableNumber = 0;
@@ -33,9 +33,12 @@ export class Compiler {
     if (node instanceof StructType) {
       this.registerStructDefinition(node);
     }
-    if (node instanceof ArrayNode && node.type.prototype instanceof StructType) {
+    if (
+      node instanceof ArrayNode &&
+      node.type.prototype instanceof StructType
+    ) {
       // @ts-ignore
-      this.registerStructDefinition(new node.type)
+      this.registerStructDefinition(new node.type());
     }
     const cache = this.inScope ? this.scopedCachedOuts : this.cachedOuts;
 
@@ -59,20 +62,24 @@ export class Compiler {
 
   private cachedUniforms = new Map<unknown, string>();
 
-  public defineUniform(type: string, name: string | null, value?: unknown): CompileResult<string> {
-    const key = name ?? value
+  public defineUniform(
+    type: string,
+    name: string | null,
+    value?: unknown
+  ): CompileResult<string> {
+    const key = name ?? value;
     if (!this.cachedUniforms.has(key)) {
-      const _name = name ?? `u_${type}_${this.variable()}`
+      const _name = name ?? `u_${type}_${this.variable()}`;
 
       this.pars.push(`
         uniform ${type} ${_name};
-      `)
-      this.uniforms[_name] = { value }
-      this.cachedUniforms.set(key, _name)
+      `);
+      this.uniforms[_name] = { value };
+      this.cachedUniforms.set(key, _name);
     }
     return {
-      out: this.cachedUniforms.get(key) as string
-    }
+      out: this.cachedUniforms.get(key) as string,
+    };
   }
 
   private registerStructDefinition(node: StructType) {

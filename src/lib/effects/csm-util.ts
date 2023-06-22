@@ -1,11 +1,22 @@
-import { FloatNode, IntExpressionNode, IntNode, UniformArrayNode, Vec2Node, float, int, select, selectPreCompile } from '../..';
+import {
+  float,
+  FloatNode,
+  int,
+  IntExpressionNode,
+  IntNode,
+  select,
+  selectPreCompile,
+  UniformArrayNode,
+  Vec2Node,
+} from '../..';
 import { varyingTransformed } from '../transformed';
 
 import { uniformCameraNear, uniformShadowFar } from './common-material';
 
-
-
-const linearDepth = varyingTransformed.mvPosition.z().multiply(float(-1)).divide(uniformShadowFar.subtract(uniformCameraNear));
+const linearDepth = varyingTransformed.mvPosition
+  .z()
+  .multiply(float(-1))
+  .divide(uniformShadowFar.subtract(uniformCameraNear));
 
 export const CSM_CASCADES = new IntExpressionNode('CSM_CASCADES');
 export const CSM_cascades = new UniformArrayNode(
@@ -13,7 +24,6 @@ export const CSM_cascades = new UniformArrayNode(
   Vec2Node,
   CSM_CASCADES
 );
-
 
 export function CSM_LightFactor(i: IntNode): FloatNode {
   const isCsmLight = i.lt(CSM_CASCADES);
@@ -31,7 +41,7 @@ export function CSM_LightFactor(i: IntNode): FloatNode {
       float(0.0)
     ),
     float(1.0)
-  )
+  );
 }
 
 export function CSM_ShadowSelector(i: IntNode, shadowNode: FloatNode) {
@@ -42,9 +52,9 @@ export function CSM_ShadowSelector(i: IntNode, shadowNode: FloatNode) {
       linearDepth
         .gte(CSM_cascades.get(i).x())
         .and(linearDepth.lt(CSM_cascades.get(i).y())),
-        shadowNode,
+      shadowNode,
       float(1.0)
     ),
     shadowNode
-  )
+  );
 }

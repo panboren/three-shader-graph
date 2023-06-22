@@ -1,4 +1,12 @@
-import { ColorRepresentation, Texture, Vector2, Vector3, Vector4, Matrix3, Matrix4 } from 'three';
+import {
+  ColorRepresentation,
+  Matrix3,
+  Matrix4,
+  Texture,
+  Vector2,
+  Vector3,
+  Vector4,
+} from 'three';
 
 import { VaryingArrayNode } from '..';
 
@@ -50,10 +58,10 @@ import {
   VaryingVec4Node,
 } from './varying';
 
-export function uniformBool(name: string, value: boolean = false) {
+export function uniformBool(name: string, value = false) {
   return new UniformBoolNode(name, value);
 }
-export function uniformFloat(name: string, value: number = 0) {
+export function uniformFloat(name: string, value = 0) {
   return new UniformFloatNode(name, value);
 }
 export function uniformVec2(name: string, value?: Vector2) {
@@ -78,7 +86,7 @@ export function uniformSampler2d(name: string) {
   return new UniformSampler2d(name);
 }
 export function textureSampler2d(texture: Texture) {
-  return new UniformSampler2d(null, texture)
+  return new UniformSampler2d(null, texture);
 }
 export function varyingFloat(n: FloatNode): FloatNode {
   return new VaryingFloatNode(n);
@@ -179,7 +187,7 @@ export function vec3(
   z?: number | FloatNode
 ): Vec3Node {
   if (x instanceof Vec3Node) {
-    return x
+    return x;
   } else if (x instanceof Vec4Node) {
     return x.xyz();
   } else if (
@@ -191,7 +199,7 @@ export function vec3(
   } else if (x instanceof Vector3 || x instanceof Vector4) {
     return new ConstantVec3Node(x);
   } else {
-    throw new Error("Invalid arguments for vec3")
+    throw new Error('Invalid arguments for vec3');
   }
 }
 

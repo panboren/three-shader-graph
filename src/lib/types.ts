@@ -83,7 +83,7 @@ export class BoolOrNode extends BoolBiOperatorNode {
   }
 }
 
-export type IIntNode = ShaderNode & {};
+export type IIntNode = ShaderNode;
 
 export abstract class IntNode implements IIntNode {
   static readonly typeName = 'int';
@@ -171,7 +171,7 @@ export class IntMultiplyNode extends IntBiOperatorNode {
 
 // Float
 
-export type IFloatNode = ShaderNode & {};
+export type IFloatNode = ShaderNode;
 
 export abstract class FloatNode implements IFloatNode {
   static readonly typeName = 'float';
@@ -269,14 +269,14 @@ export class FloatMultiplyNode extends FloatBiOperatorNode {
   }
 }
 
-export type IVec2Node = ShaderNode & {};
-export type IVec3Node = ShaderNode & {};
-export type IVec4Node = ShaderNode & {};
-export type IRgbNode = ShaderNode & {};
-export type IRgbaNode = ShaderNode & {};
-export type IMat2Node = ShaderNode & {};
-export type IMat3Node = ShaderNode & {};
-export type IMat4Node = ShaderNode & {};
+export type IVec2Node = ShaderNode;
+export type IVec3Node = ShaderNode;
+export type IVec4Node = ShaderNode;
+export type IRgbNode = ShaderNode;
+export type IRgbaNode = ShaderNode;
+export type IMat2Node = ShaderNode;
+export type IMat3Node = ShaderNode;
+export type IMat4Node = ShaderNode;
 
 // Vec2
 export abstract class Vec2Node implements IVec2Node {
@@ -1361,7 +1361,7 @@ export class RgbToRgbaNode implements IRgbaNode {
   constructor(
     private readonly rgb: RgbNode,
     private readonly alpha: IFloatNode
-  ) { }
+  ) {}
   public compile(c: Compiler) {
     const vec = c.get(this.rgb);
     const a = c.get(this.alpha);
@@ -1374,7 +1374,7 @@ export class RgbToRgbaNode implements IRgbaNode {
 }
 
 export class RgbaToRgbNode implements IRgbNode {
-  constructor(private readonly rgb: RgbaNode) { }
+  constructor(private readonly rgb: RgbaNode) {}
   public compile(c: Compiler) {
     const vec = c.get(this.rgb);
     const k = c.variable();
@@ -1518,14 +1518,14 @@ export class EqualsNode extends BooleanNode {
 
 function equals<
   T extends
-  | IntNode
-  | FloatNode
-  | Vec2Node
-  | Vec3Node
-  | Vec4Node
-  | Mat2Node
-  | Mat3Node
-  | Mat4Node
+    | IntNode
+    | FloatNode
+    | Vec2Node
+    | Vec3Node
+    | Vec4Node
+    | Mat2Node
+    | Mat3Node
+    | Mat4Node
 >(a: T, b: T): BooleanNode {
   return new (class extends BooleanNode {
     public compile(c: Compiler) {
@@ -1536,14 +1536,14 @@ function equals<
 
 function notEquals<
   T extends
-  | IntNode
-  | FloatNode
-  | Vec2Node
-  | Vec3Node
-  | Vec4Node
-  | Mat2Node
-  | Mat3Node
-  | Mat4Node
+    | IntNode
+    | FloatNode
+    | Vec2Node
+    | Vec3Node
+    | Vec4Node
+    | Mat2Node
+    | Mat3Node
+    | Mat4Node
 >(a: T, b: T): BooleanNode {
   return new (class extends BooleanNode {
     public compile(c: Compiler) {
@@ -1577,11 +1577,11 @@ export class Texture2dLookupNode extends RgbaNode {
       chunk:
         this.bias != null
           ? `vec4 texture_sample_${k} = texture2D(${sampler}, ${c.get(
-            this.cord
-          )}, ${c.get(this.bias)});`
+              this.cord
+            )}, ${c.get(this.bias)});`
           : `vec4 texture_sample_${k} = texture2D(${sampler}, ${c.get(
-            this.cord
-          )});`,
+              this.cord
+            )});`,
       out: `texture_sample_${k}`,
     };
   }

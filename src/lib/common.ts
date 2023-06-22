@@ -1,3 +1,4 @@
+import { AttributeVec4Node } from './attributes';
 import { Compiler } from './compiler';
 import {
   Mat3ExpressionNode,
@@ -8,8 +9,7 @@ import {
 } from './expressions';
 import { identityTransform } from './transformation/transforms';
 import { Mat4Node } from './types';
-import { AttributeVec4Node } from './attributes';
-import { VaryingVec3Node, VaryingVec2Node } from './varying';
+import { VaryingVec2Node, VaryingVec3Node } from './varying';
 
 export const attributes = {
   tangent: new AttributeVec4Node('tangent'),
@@ -21,8 +21,8 @@ export const attributes = {
 export const varyingAttributes = {
   position: new VaryingVec3Node(attributes.position),
   normal: new VaryingVec3Node(attributes.normal),
-  uv: new VaryingVec2Node(attributes.uv)
-}
+  uv: new VaryingVec2Node(attributes.uv),
+};
 
 class InstanceMatrixNode extends Mat4Node {
   public compile(c: Compiler) {

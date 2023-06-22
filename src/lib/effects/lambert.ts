@@ -9,7 +9,6 @@ import {
   uniformPointLights,
   uniformSpotLights,
 } from '../lights';
-import { select, selectPreCompile } from '../nodes';
 import { transformed } from '../transformed';
 import { RgbaNode, RgbNode, Vec3Node } from '../types';
 
@@ -52,13 +51,15 @@ function calculateDirLight(geometry: Geometry): Vec3Node {
     const directLight = getDirectionalLightInfo(light, geometry);
     const dotNL = dot(geometry.normal, directLight.direction);
     const directLightColor_Diffuse = directLight.color;
-    return directLightColor_Diffuse.multiplyScalar(saturate(dotNL)).multiplyScalar(
-      CSM_LightFactor(i)
-    );;
+    return directLightColor_Diffuse
+      .multiplyScalar(saturate(dotNL))
+      .multiplyScalar(CSM_LightFactor(i));
   });
 }
 
-export function lambertMaterial(diffuse: RgbNode | {color: RgbNode}): RgbaNode {
+export function lambertMaterial(
+  diffuse: RgbNode | { color: RgbNode }
+): RgbaNode {
   const geometry = {
     position: transformed.mvPosition.xyz(),
     normal: normalize(transformed.normal),
@@ -70,7 +71,7 @@ export function lambertMaterial(diffuse: RgbNode | {color: RgbNode}): RgbaNode {
   const combinedHemiLight = calculateHemisphereLight(geometry);
   const combinedDirLight = calculateDirLight(geometry);
 
-  const vLightFront = varyingVec3( 
+  const vLightFront = varyingVec3(
     combinedPointLight.add(combinedDirLight).add(combinedSpotLight)
   );
   const vIndirectFront = varyingVec3(combinedHemiLight.add(uniformAmbient));

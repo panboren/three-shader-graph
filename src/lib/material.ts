@@ -2,8 +2,8 @@ import { IUniform, ShaderMaterial } from 'three';
 import * as THREE from 'three';
 
 import { rgba } from './dsl';
-import { ConstantMat4Node, IRgbaNode, Mat4Node } from './types';
 import { ShaderGraph } from './shader-graph';
+import { ConstantMat4Node, IRgbaNode, Mat4Node } from './types';
 
 const identityMat4 = new ConstantMat4Node(
   1,
@@ -37,7 +37,7 @@ const nodeShaderMaterialDefaults = {
   transform: identityMat4,
   uniforms: {},
   transparent: false,
-  alphaTest: 0
+  alphaTest: 0,
 } as Required<NodeShaderMaterialParameters>;
 
 export class NodeShaderMaterial extends ShaderMaterial {
@@ -47,24 +47,27 @@ export class NodeShaderMaterial extends ShaderMaterial {
       ...params,
     };
 
-    const shaders = new ShaderGraph({
-      color: paramsWithDefaults.color,
-      transform: paramsWithDefaults.transform,
-    }, {
-      alphaTest: paramsWithDefaults.alphaTest
-    }).compile();
+    const shaders = new ShaderGraph(
+      {
+        color: paramsWithDefaults.color,
+        transform: paramsWithDefaults.transform,
+      },
+      {
+        alphaTest: paramsWithDefaults.alphaTest,
+      }
+    ).compile();
 
     const uniforms: { [uniform: string]: IUniform } = {
       ...shaders.uniforms,
       ...paramsWithDefaults.uniforms,
       ...THREE.UniformsLib.fog,
-      ...THREE.UniformsLib.lights
-    }
-    
+      ...THREE.UniformsLib.lights,
+    };
+
     const defines = {
       USE_CSM: false,
-      CSM_CASCADES: 0
-    }
+      CSM_CASCADES: 0,
+    };
 
     super({
       fragmentShader: shaders.fragmentShader,
@@ -73,9 +76,7 @@ export class NodeShaderMaterial extends ShaderMaterial {
       lights: true,
       fog: true, // Necessary for fog uniforms to be set based on fog set up on the scene.
       uniforms,
-      defines
+      defines,
     });
-
-
   }
 }

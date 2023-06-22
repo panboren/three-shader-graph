@@ -1,4 +1,5 @@
-import { Texture, Matrix4, Vector2, Matrix3, Vector3, Vector4 } from 'three';
+import { Matrix3, Matrix4, Texture, Vector2, Vector3, Vector4 } from 'three';
+
 import { Compiler } from './compiler';
 import {
   BooleanNode,
@@ -13,16 +14,22 @@ import {
 } from './types';
 
 export class UniformBoolNode extends BooleanNode {
-  constructor(private readonly name: string, private readonly value: boolean = false) {
+  constructor(
+    private readonly name: string,
+    private readonly value: boolean = false
+  ) {
     super();
   }
   public compile(c: Compiler) {
-    return c.defineUniform('bool', this.name, this.value)
+    return c.defineUniform('bool', this.name, this.value);
   }
 }
 
 export class UniformFloatNode extends FloatNode {
-  constructor(private readonly name: string, private readonly value: number = 0) {
+  constructor(
+    private readonly name: string,
+    private readonly value: number = 0
+  ) {
     super();
   }
   public compile(c: Compiler) {
@@ -35,7 +42,7 @@ export class UniformVec2Node extends Vec2Node {
     super();
   }
   public compile(c: Compiler) {
-    return c.defineUniform('vec2', this.name, this.value)
+    return c.defineUniform('vec2', this.name, this.value);
   }
 }
 
@@ -44,7 +51,7 @@ export class UniformVec3Node extends Vec3Node {
     super();
   }
   public compile(c: Compiler) {
-    return c.defineUniform('vec3', this.name, this.value)
+    return c.defineUniform('vec3', this.name, this.value);
   }
 }
 
@@ -53,7 +60,7 @@ export class UniformVec4Node extends Vec4Node {
     super();
   }
   public compile(c: Compiler) {
-    return c.defineUniform('vec4', this.name, this.value)
+    return c.defineUniform('vec4', this.name, this.value);
   }
 }
 
@@ -62,7 +69,7 @@ export class UniformMat2Node extends Mat2Node {
     super();
   }
   public compile(c: Compiler) {
-    return c.defineUniform('mat2', this.name, this.value)
+    return c.defineUniform('mat2', this.name, this.value);
   }
 }
 
@@ -71,7 +78,7 @@ export class UniformMat3Node extends Mat3Node {
     super();
   }
   public compile(c: Compiler) {
-    return c.defineUniform('mat3', this.name, this.value)
+    return c.defineUniform('mat3', this.name, this.value);
   }
 }
 
@@ -80,15 +87,18 @@ export class UniformMat4Node extends Mat4Node {
     super();
   }
   public compile(c: Compiler) {
-    return c.defineUniform('mat4', this.name, this.value)
+    return c.defineUniform('mat4', this.name, this.value);
   }
 }
 
 export class UniformSampler2d extends Sampler2DNode {
-  constructor(private readonly name: string | null, private readonly value?: Texture) {
+  constructor(
+    private readonly name: string | null,
+    private readonly value?: Texture
+  ) {
     super();
   }
   public compile(c: Compiler) {
-    return c.defineUniform('sampler2D', this.name, this.value)
+    return c.defineUniform('sampler2D', this.name, this.value);
   }
 }

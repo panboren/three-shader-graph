@@ -40,6 +40,11 @@ const mesh = new Mesh(sphere, material)
 npm install three-shader-graph
 ```
 
+## Release 
+
+1. Update the version in package.json
+2. `npm run fix && npm run build`
+
 ## Documentation 
 
 [See the wiki](https://github.com/adamringhede/three-shader-graph/wiki)
