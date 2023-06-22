@@ -54,11 +54,16 @@ export class NodeShaderMaterial extends ShaderMaterial {
       alphaTest: paramsWithDefaults.alphaTest
     }).compile();
 
-    const uniforms = {
+    const uniforms: { [uniform: string]: IUniform } = {
       ...shaders.uniforms,
       ...paramsWithDefaults.uniforms,
       ...THREE.UniformsLib.fog,
-      ...THREE.UniformsLib.lights,
+      ...THREE.UniformsLib.lights
+    }
+    
+    const defines = {
+      USE_CSM: false,
+      CSM_CASCADES: 0
     }
 
     super({
@@ -67,7 +72,8 @@ export class NodeShaderMaterial extends ShaderMaterial {
       transparent: paramsWithDefaults.transparent,
       lights: true,
       fog: true, // Necessary for fog uniforms to be set based on fog set up on the scene.
-      uniforms
+      uniforms,
+      defines
     });
 
 

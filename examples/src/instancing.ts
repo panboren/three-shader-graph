@@ -1,15 +1,14 @@
+import * as Stats from 'stats.js';
 import * as THREE from 'three';
-import { Clock, Material, Mesh, MeshLambertMaterial, MeshStandardMaterial, PerspectiveCamera, PlaneGeometry, PointLight, SphereGeometry, Vector3, WebGLRenderer, PCFShadowMap, Texture, WebGLRenderTarget, InstancedMesh, Matrix4 } from 'three';
+import { Clock, InstancedMesh, Material, Matrix4, Mesh, PCFShadowMap, PerspectiveCamera, PlaneGeometry, PointLight, SphereGeometry, Vector3, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { attributes, NodeShaderMaterial } from '../../src/index';
-import { float, rgb, uniformFloat, varyingVec2 } from '../../src/lib/dsl';
+import { NodeShaderMaterial } from '../../src/index';
+import { float, rgb, uniformFloat } from '../../src/lib/dsl';
+import { lambertMaterial } from '../../src/lib/effects/lambert';
 import { standardMaterial } from '../../src/lib/effects/physical';
 import { sin } from '../../src/lib/functions';
 import { translateY } from '../../src/lib/transformation/transforms';
 import { UniformFloatNode } from '../../src/lib/uniforms';
-import { lambertMaterial } from '../../src/lib/effects/lambert';
-import * as Stats from 'stats.js'
-import { uniformDirectionalShadowMap, uniformPointShadowMap } from '../../src/lib/lights';
 
 
 export function init() {
