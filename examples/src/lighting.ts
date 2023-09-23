@@ -99,20 +99,25 @@ export function init() {
   mesh.position.set(0, 0, 0)
   scene.add(mesh)
 
-  const pointlight = new PointLight(null, 0.2)
-  pointlight.position.set(10, 10, 5)
-  pointlight.castShadow = true
+  const pointlight = new PointLight(null, 0.5)
+  pointlight.position.set(10, 1, 5)
+  pointlight.castShadow = false
+  pointlight.distance = 0
   scene.add(pointlight)
+
+  setInterval(() => {
+    pointlight.castShadow = !pointlight.castShadow
+  }, 1000)
 
   const pointlight2 = new PointLight(null, 0.1)
   pointlight2.position.set(10, 10, 3)
   pointlight2.castShadow = true
-  scene.add(pointlight2)
+  //scene.add(pointlight2)
 
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
   directionalLight.position.x = -0.5
   directionalLight.castShadow = true
-  scene.add(directionalLight);
+  //scene.add(directionalLight);
 
   const spotLight = new THREE.SpotLight(0xffffff, 0.5);
   spotLight.position.set(1, 15, 0);
@@ -125,10 +130,10 @@ export function init() {
   spotLight.shadow.camera.near = 1;
   spotLight.shadow.camera.far = 4000;
   spotLight.shadow.camera.fov = 30;
-  scene.add(spotLight)
+  //scene.add(spotLight)
 
   const hemilight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.3);
-  scene.add(hemilight);
+  //scene.add(hemilight);
 
   scene.add(createPlane())
 
@@ -146,7 +151,7 @@ export function init() {
 }
 
 function createPlane() {
-  const plane = new PlaneGeometry(40, 40);
+  const plane = new PlaneGeometry(400, 400);
 
   let material: Material;
   material = new NodeShaderMaterial({

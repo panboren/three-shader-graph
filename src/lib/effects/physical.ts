@@ -1,13 +1,5 @@
 import { uniforms } from '../common';
-import {
-  float,
-  int,
-  negVec3,
-  rgb,
-  rgba,
-  varyingArray,
-  vec4,
-} from '../dsl';
+import { float, int, negVec3, rgb, rgba, varyingArray, vec4 } from '../dsl';
 import { dot, normalize, saturate } from '../functions';
 import {
   uniformDirectionalLights,

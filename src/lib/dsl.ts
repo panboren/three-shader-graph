@@ -151,7 +151,10 @@ export function rgb(color: ColorRepresentation) {
   return new ConstantRgbNode(color);
 }
 
-export function bool(b: boolean): BooleanNode {
+export function bool(b: boolean | BooleanNode): BooleanNode {
+  if (b instanceof BooleanNode) {
+    return b;
+  }
   return new ConstantBooleanNode(b);
 }
 

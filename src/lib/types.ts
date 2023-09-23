@@ -8,6 +8,7 @@ import {
 } from 'three';
 
 import { Compiler, CompileResult, ShaderNode } from './compiler';
+import { bool, float, int } from './dsl';
 
 // Common for types
 function compileBiOperator<T extends ShaderNode<string>>(
@@ -34,12 +35,12 @@ export abstract class BooleanNode implements ShaderNode<string> {
     return true;
   }
 
-  public and(other: BooleanNode) {
-    return new BoolAddNode(this, other);
+  public and(other: BooleanNode | boolean) {
+    return new BoolAddNode(this, bool(other));
   }
 
-  public or(other: BooleanNode) {
-    return new BoolOrNode(this, other);
+  public or(other: BooleanNode | boolean) {
+    return new BoolOrNode(this, bool(other));
   }
 }
 
@@ -92,32 +93,32 @@ export abstract class IntNode implements IIntNode {
     return true;
   }
 
-  public add(other: IIntNode) {
-    return new IntAddNode(this, other);
+  public add(other: IntNode | number) {
+    return new IntAddNode(this, int(other));
   }
-  public subtract(other: IIntNode) {
-    return new IntSubtractNode(this, other);
+  public subtract(other: IntNode | number) {
+    return new IntSubtractNode(this, int(other));
   }
-  public multiply(other: IIntNode) {
-    return new IntMultiplyNode(this, other);
+  public multiply(other: IntNode | number) {
+    return new IntMultiplyNode(this, int(other));
   }
-  public gt(other: IntNode): BooleanNode {
-    return new IntGtNode(this, other);
+  public gt(other: IntNode | number): BooleanNode {
+    return new IntGtNode(this, int(other));
   }
-  public lt(other: IntNode): BooleanNode {
-    return new IntLtNode(this, other);
+  public lt(other: IntNode | number): BooleanNode {
+    return new IntLtNode(this, int(other));
   }
-  public gte(other: IntNode): BooleanNode {
-    return new IntGteNode(this, other);
+  public gte(other: IntNode | number): BooleanNode {
+    return new IntGteNode(this, int(other));
   }
-  public lte(other: IntNode): BooleanNode {
-    return new IntLteNode(this, other);
+  public lte(other: IntNode | number): BooleanNode {
+    return new IntLteNode(this, int(other));
   }
-  public equals(other: IntNode): BooleanNode {
-    return equals(this, other);
+  public equals(other: IntNode | number): BooleanNode {
+    return equals(this, int(other));
   }
-  public notEquals(other: IntNode): BooleanNode {
-    return notEquals(this, other);
+  public notEquals(other: IntNode | number): BooleanNode {
+    return notEquals(this, int(other));
   }
 }
 
@@ -180,44 +181,44 @@ export abstract class FloatNode implements IFloatNode {
     return true;
   }
 
-  public add(other: IFloatNode) {
-    return new FloatAddNode(this, other);
+  public add(other: FloatNode | number) {
+    return new FloatAddNode(this, float(other));
   }
-  public subtract(other: IFloatNode) {
-    return new FloatSubtractNode(this, other);
+  public subtract(other: FloatNode | number) {
+    return new FloatSubtractNode(this, float(other));
   }
-  public divide(other: IFloatNode) {
-    return new FloatDivNode(this, other);
+  public divide(other: FloatNode | number) {
+    return new FloatDivNode(this, float(other));
   }
-  public multiply(other: IFloatNode) {
-    return new FloatMultiplyNode(this, other);
+  public multiply(other: FloatNode | number) {
+    return new FloatMultiplyNode(this, float(other));
   }
-  public multiplyVec2(other: IVec3Node) {
+  public multiplyVec2(other: IVec2Node) {
     return new FloatVec2MultiplyNode(this, other);
   }
   public multiplyVec3(other: IVec3Node) {
     return new FloatVec3MultiplyNode(this, other);
   }
-  public multiplyVec4(other: IVec3Node) {
+  public multiplyVec4(other: IVec4Node) {
     return new FloatVec4MultiplyNode(this, other);
   }
-  public gt(other: FloatNode): BooleanNode {
-    return new GtNode(this, other);
+  public gt(other: FloatNode | number): BooleanNode {
+    return new GtNode(this, float(other));
   }
-  public lt(other: FloatNode): BooleanNode {
-    return new LtNode(this, other);
+  public lt(other: FloatNode | number): BooleanNode {
+    return new LtNode(this, float(other));
   }
-  public gte(other: FloatNode): BooleanNode {
-    return new GteNode(this, other);
+  public gte(other: FloatNode | number): BooleanNode {
+    return new GteNode(this, float(other));
   }
-  public lte(other: FloatNode): BooleanNode {
-    return new LteNode(this, other);
+  public lte(other: FloatNode | number): BooleanNode {
+    return new LteNode(this, float(other));
   }
-  public equals(other: FloatNode): BooleanNode {
-    return equals(this, other);
+  public equals(other: FloatNode | number): BooleanNode {
+    return equals(this, float(other));
   }
-  public notEquals(other: FloatNode): BooleanNode {
-    return notEquals(this, other);
+  public notEquals(other: FloatNode | number): BooleanNode {
+    return notEquals(this, float(other));
   }
 }
 
@@ -294,26 +295,26 @@ export abstract class Vec2Node implements IVec2Node {
     return getY(this);
   }
 
-  public subtractScalar(other: FloatNode): Vec2Node {
-    return new Vec2FloatSubtractNode(this, other);
+  public subtractScalar(other: FloatNode | number): Vec2Node {
+    return new Vec2FloatSubtractNode(this, float(other));
   }
   public subtract(other: Vec2Node): Vec2Node {
     return new Vec2SubtractNode(this, other);
   }
-  public addScalar(other: FloatNode): Vec2Node {
-    return new Vec2FloatAddNode(this, other);
+  public addScalar(other: FloatNode | number): Vec2Node {
+    return new Vec2FloatAddNode(this, float(other));
   }
   public add(other: Vec2Node): Vec2Node {
     return new Vec2AddNode(this, other);
   }
-  public divideScalar(other: FloatNode): Vec2Node {
-    return new Vec2FloatDivideNode(this, other);
+  public divideScalar(other: FloatNode | number): Vec2Node {
+    return new Vec2FloatDivideNode(this, float(other));
   }
   public divide(other: Vec2Node): Vec2Node {
     return new Vec2DivNode(this, other);
   }
-  public multiplyScalar(other: FloatNode): Vec2Node {
-    return new Vec2FloatMultiplyNode(this, other);
+  public multiplyScalar(other: FloatNode | number): Vec2Node {
+    return new Vec2FloatMultiplyNode(this, float(other));
   }
   public multiply(other: Vec2Node): Vec2Node {
     return new Vec2MultiplyNode(this, other);
@@ -461,26 +462,26 @@ export abstract class Vec3Node implements IVec3Node {
     return new ComponentsRgbNode(this.x(), this.y(), this.z());
   }
 
-  public subtractScalar(other: FloatNode): Vec3Node {
-    return new Vec3FloatSubtractNode(this, other);
+  public subtractScalar(other: FloatNode | number): Vec3Node {
+    return new Vec3FloatSubtractNode(this, float(other));
   }
   public subtract(other: Vec3Node): Vec3Node {
     return new Vec3SubtractNode(this, other);
   }
-  public addScalar(other: FloatNode): Vec3Node {
-    return new Vec3FloatAddNode(this, other);
+  public addScalar(other: FloatNode | number): Vec3Node {
+    return new Vec3FloatAddNode(this, float(other));
   }
   public add(other: Vec3Node): Vec3Node {
     return new Vec3AddNode(this, other);
   }
-  public divideScalar(other: FloatNode): Vec3Node {
-    return new Vec3FloatDivideNode(this, other);
+  public divideScalar(other: FloatNode | number): Vec3Node {
+    return new Vec3FloatDivideNode(this, float(other));
   }
   public divide(other: Vec3Node): Vec3Node {
     return new Vec3DivNode(this, other);
   }
-  public multiplyScalar(other: FloatNode): Vec3Node {
-    return new Vec3FloatMultiplyNode(this, other);
+  public multiplyScalar(other: FloatNode | number): Vec3Node {
+    return new Vec3FloatMultiplyNode(this, float(other));
   }
   public multiply(other: Vec3Node): Vec3Node {
     return new Vec3MultiplyNode(this, other);
@@ -642,26 +643,26 @@ export abstract class Vec4Node implements IVec4Node {
     return new ComponentsRgbaNode(this.x(), this.y(), this.z(), this.w());
   }
 
-  public subtractScalar(other: FloatNode): Vec4Node {
-    return new Vec4FloatSubtractNode(this, other);
+  public subtractScalar(other: FloatNode | number): Vec4Node {
+    return new Vec4FloatSubtractNode(this, float(other));
   }
   public subtract(other: Vec4Node): Vec4Node {
     return new Vec4SubtractNode(this, other);
   }
-  public addScalar(other: FloatNode): Vec4Node {
-    return new Vec4FloatAddNode(this, other);
+  public addScalar(other: FloatNode | number): Vec4Node {
+    return new Vec4FloatAddNode(this, float(other));
   }
   public add(other: Vec4Node): Vec4Node {
     return new Vec4AddNode(this, other);
   }
-  public divideScalar(other: FloatNode): Vec4Node {
-    return new Vec4FloatDivideNode(this, other);
+  public divideScalar(other: FloatNode | number): Vec4Node {
+    return new Vec4FloatDivideNode(this, float(other));
   }
   public divide(other: Vec4Node): Vec4Node {
     return new Vec4DivNode(this, other);
   }
-  public multiplyScalar(other: FloatNode): Vec4Node {
-    return new Vec4FloatMultiplyNode(this, other);
+  public multiplyScalar(other: FloatNode | number): Vec4Node {
+    return new Vec4FloatMultiplyNode(this, float(other));
   }
   public multiply(other: Vec4Node): Vec4Node {
     return new Vec4MultiplyNode(this, other);
@@ -795,8 +796,8 @@ export abstract class Mat2Node implements IMat2Node {
   subtract(other: Mat2Node): Mat2Node {
     return new Mat2SubtractNode(this, other);
   }
-  divideScalar(other: FloatNode): Mat2Node {
-    return new Mat2FloatDivNode(this, other);
+  divideScalar(other: FloatNode | number): Mat2Node {
+    return new Mat2FloatDivNode(this, float(other));
   }
   multiplyScalar(other: Vec2Node): Mat2Node {
     return new Mat2FloatMultiplyNode(this, other);
@@ -922,8 +923,8 @@ export abstract class Mat3Node implements IMat3Node {
   subtract(other: Mat3Node): Mat3Node {
     return new Mat3SubtractNode(this, other);
   }
-  divideScalar(other: FloatNode): Mat3Node {
-    return new Mat3FloatDivNode(this, other);
+  divideScalar(other: FloatNode | number): Mat3Node {
+    return new Mat3FloatDivNode(this, float(other));
   }
   multiplyScalar(other: Vec3Node): Mat3Node {
     return new Mat3FloatMultiplyNode(this, other);
@@ -1061,11 +1062,11 @@ export abstract class Mat4Node implements IMat4Node {
   subtract(other: Mat4Node): Mat4Node {
     return new Mat4SubtractNode(this, other);
   }
-  divideScalar(other: FloatNode): Mat4Node {
-    return new Mat4FloatDivNode(this, other);
+  divideScalar(other: FloatNode | number): Mat4Node {
+    return new Mat4FloatDivNode(this, float(other));
   }
-  multiplyScalar(other: FloatNode): Mat4Node {
-    return new Mat4FloatMultiplyNode(this, other);
+  multiplyScalar(other: FloatNode | number): Mat4Node {
+    return new Mat4FloatMultiplyNode(this, float(other));
   }
   multiplyVec(other: Vec4Node): Vec4Node {
     return new MatVec4MultiplyNode(this, other);
@@ -1297,8 +1298,14 @@ export abstract class RgbNode extends Vec3Node implements IRgbNode {
   public b() {
     return this.z();
   }
-  public rgba(alpha: IFloatNode) {
-    return new RgbToRgbaNode(this, alpha);
+  public rgba(alpha: FloatNode | number) {
+    return new RgbToRgbaNode(this, float(alpha));
+  }
+  public add(other: RgbNode): RgbNode {
+    return super.add(other).rgb();
+  }
+  public multiplyScalar(other: number | FloatNode): RgbNode {
+    return super.multiplyScalar(other).rgb();
   }
 }
 
