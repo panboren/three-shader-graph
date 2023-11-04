@@ -462,6 +462,10 @@ export abstract class Vec3Node implements IVec3Node {
     return new ComponentsRgbNode(this.x(), this.y(), this.z());
   }
 
+  public rgba(alpha: number | FloatNode) {
+    return this.rgb().rgba(alpha);
+  }
+
   public subtractScalar(other: FloatNode | number): Vec3Node {
     return new Vec3FloatSubtractNode(this, float(other));
   }
@@ -1399,8 +1403,8 @@ export class RgbToRgbaNode implements IRgbaNode {
     const a = c.get(this.alpha);
     const k = c.variable();
     return {
-      chunk: `vec3 vec3_${k} = vec4(${vec}.x,${vec}.y,${vec}.z, ${a});`,
-      out: `vec3_${k}`,
+      chunk: `vec4 vec4_${k} = vec4(${vec}.x,${vec}.y,${vec}.z, ${a});`,
+      out: `vec4_${k}`,
     };
   }
 }
