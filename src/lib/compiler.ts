@@ -19,9 +19,15 @@ export class Compiler {
     return ++this.variableNumber;
   }
 
-  public startScope() {
+  public startScope(...copiedNodes: ShaderNode[]) {
     this.inScope = true;
     this.scopedCachedOuts.clear();
+    for (const node of copiedNodes) {
+      const cached = this.cachedOuts.get(node)
+      if (cached != null) {
+        this.scopedCachedOuts.set(node, cached)
+      }
+    }
   }
 
   public stopScope() {

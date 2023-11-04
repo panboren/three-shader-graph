@@ -63,6 +63,8 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
         const start = `
           ${type.typeName} loop_sum_${k} = ${type.typeName}(0.0);
           #if ${limit} > 0
+          // Ensure the array is evaluated before the loop
+          ${c.get(self)};
           //VARIABLES
           #pragma unroll_loop_start
           for ( int i = 0; i < ${c.get(int(self.limit))}; i ++ ) {
@@ -73,7 +75,7 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
 
         const innerChunkStartIndex = c.chunks.length;
 
-        c.startScope();
+        c.startScope(self);
         const blockResultOut = c.get(blockReturn);
         c.stopScope();
 
@@ -114,7 +116,7 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
 
   public map<R extends ShaderNode<string>>(block: (v: T, index: IntNode) => R) {
     const self = this;
-    const indexReference = new IntExpressionNode('i');
+    const indexReference = new IntExpressionNode('UNROLLED_LOOP_INDEX');
     const blockReturn = block(self.get(indexReference), indexReference);
     const returnType = blockReturn.constructor as BaseType<R>;
     // @ts-expect-error
@@ -123,27 +125,51 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
       public readonly limit = self.limit;
       public compile(c: Compiler) {
         const k = c.variable();
-
         const limit = c.get(int(self.limit));
         const start = `
           #if ${limit} > 0
           ${returnType.typeName} loop_map_${k}[${limit}];
-
-          for (int i = 0; i < ${limit}; ++i) {
+          //VARIABLES
+          #pragma unroll_loop_start
+          for ( int i = 0; i < ${limit}; i ++ ) {
         `;
         // This is a hacky solution to ensure that the block does not append anything before this block does.
         // There should be a better way of wrapping another node in a chunk as it is now only supporting sequential appends.
         c.chunks.push(start);
 
+        const innerChunkStartIndex = c.chunks.length;
+
         c.startScope();
-        const blockResult = blockReturn.compile(c);
+        const blockResultOut = c.get(blockReturn);
         c.stopScope();
+
+        // This deals with extracting variables and declaring them before the loop
+        // starts so it can be unrolled without redefining variables
+        const variableDeclerations = c.chunks
+          .slice(innerChunkStartIndex)
+          .map((chunk) => {
+            return Array.from(chunk.matchAll(variableExtractRx)).map((m) => {
+              return `${m[1]} ${m[2]};`;
+            });
+          })
+          .reduce((a, v) => a.concat(v))
+          .join('\n');
+
+        c.chunks.slice(innerChunkStartIndex).forEach((innerChunk, i) => {
+          c.chunks[innerChunkStartIndex + i] = innerChunk.replace(
+            variableRx,
+            ''
+          );
+        });
+        c.chunks[innerChunkStartIndex - 1] = c.chunks[
+          innerChunkStartIndex - 1
+        ].replace('//VARIABLES', variableDeclerations);
 
         return {
           chunk: `
-              ${blockResult.chunk ?? ''}
-              loop_map_${k}[i] = ${blockResult.out};
+              loop_map_${k}[i] = ${blockResultOut};
             }
+            #pragma unroll_loop_end
             #else
             ${returnType.typeName} loop_map_${k}[1];
             #endif
