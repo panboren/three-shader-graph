@@ -1263,15 +1263,15 @@ export abstract class RgbaNode extends Vec4Node implements IRgbaNode {
   public a() {
     return this.w();
   }
-  
+
   public subtractScalar(other: FloatNode | number): RgbaNode {
-    return super.subtractScalar(other).rgba()
+    return super.subtractScalar(other).rgba();
   }
   public subtract(other: Vec4Node): RgbaNode {
-    return super.subtract(other).rgba()
+    return super.subtract(other).rgba();
   }
   public addScalar(other: FloatNode | number): RgbaNode {
-    return super.addScalar(other).rgba()
+    return super.addScalar(other).rgba();
   }
   public add(other: RgbaNode): RgbaNode {
     return super.add(other).rgba();

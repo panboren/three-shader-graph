@@ -2,6 +2,15 @@ import { ArrayNode } from './arrays';
 import { int } from './dsl';
 import { StructType } from './structs';
 import { IntNode } from './types';
+import {
+  VaryingFloatNode,
+  VaryingMat2Node,
+  VaryingMat3Node,
+  VaryingMat4Node,
+  VaryingVec2Node,
+  VaryingVec3Node,
+  VaryingVec4Node,
+} from './varying';
 
 export class Compiler {
   private readonly cachedOuts = new Map<ShaderNode<any>, CompileResult<any>>();
@@ -23,9 +32,9 @@ export class Compiler {
     this.inScope = true;
     this.scopedCachedOuts.clear();
     for (const node of copiedNodes) {
-      const cached = this.cachedOuts.get(node)
+      const cached = this.cachedOuts.get(node);
       if (cached != null) {
-        this.scopedCachedOuts.set(node, cached)
+        this.scopedCachedOuts.set(node, cached);
       }
     }
   }
@@ -46,7 +55,10 @@ export class Compiler {
       // @ts-ignore
       this.registerStructDefinition(new node.type());
     }
-    const cache = this.inScope ? this.scopedCachedOuts : this.cachedOuts;
+    const cache =
+      this.inScope && !isVarying(node)
+        ? this.scopedCachedOuts
+        : this.cachedOuts;
 
     if (!cache.has(node)) {
       const result = node.compile(this);
@@ -177,3 +189,15 @@ export type CompileResult<T> = {
 export type ShaderNode<T = string> = {
   compile(c: Compiler): CompileResult<T>;
 };
+
+function isVarying(node) {
+  return [
+    VaryingFloatNode,
+    VaryingVec2Node,
+    VaryingVec3Node,
+    VaryingVec4Node,
+    VaryingMat2Node,
+    VaryingMat3Node,
+    VaryingMat4Node,
+  ].some((t) => node instanceof t);
+}

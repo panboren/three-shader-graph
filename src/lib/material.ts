@@ -50,7 +50,8 @@ export class NodeShaderMaterial extends ShaderMaterial {
     const shaders = new ShaderGraph(
       {
         color: paramsWithDefaults.color ?? nodeShaderMaterialDefaults.color,
-        transform: paramsWithDefaults.transform ?? nodeShaderMaterialDefaults.transform,
+        transform:
+          paramsWithDefaults.transform ?? nodeShaderMaterialDefaults.transform,
       },
       {
         alphaTest: paramsWithDefaults.alphaTest,

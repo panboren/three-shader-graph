@@ -119,23 +119,15 @@ function calculateSpotLight(
   return directDiffuse;
 }
 
-function calculateDirectionalLight(
-  geometry: Geometry,
-  material: PhysicalMaterial
-): Vec3Node {
-  const directionalShadowCoords = uniformDirectionalLightShadows.map((p, i) => {
-    const shadowWorldPosition = worldPosition.add(
-      vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0)
-    );
-    return uniformDirectionalShadowMatrix
-      .get(i)
-      .multiplyVec(shadowWorldPosition);
-  });
-  const vDirectionalShadowCoord = varyingArray(directionalShadowCoords);
-
-  const directDiffuse = uniformDirectionalLights.sum((light, i) => {
-    const directionalLightShadow = uniformDirectionalLightShadows.get(i);
-
+const directionalShadowCoords = uniformDirectionalLightShadows.map((p, i) => {
+  const shadowWorldPosition = worldPosition.add(
+    vec4(shadowWorldNormal.multiplyScalar(p.shadowNormalBias), 0)
+  );
+  return uniformDirectionalShadowMatrix.get(i).multiplyVec(shadowWorldPosition);
+});
+const vDirectionalShadowCoord = varyingArray(directionalShadowCoords);
+const directionalShadowFactors = uniformDirectionalLightShadows.map(
+  (directionalLightShadow, i) => {
     const getShadowNode: FloatNode = new GetShadowNode(
       uniformDirectionalShadowMap.get(i),
       directionalLightShadow.shadowMapSize,
@@ -159,7 +151,16 @@ function calculateDirectionalLight(
       getShadowNodeWithCsm,
       float(1.0)
     );
+    return shadowFactor;
+  }
+);
 
+function calculateDirectionalLight(
+  geometry: Geometry,
+  material: PhysicalMaterial
+): Vec3Node {
+  const directDiffuse = directionalShadowFactors.sum((shadowFactor, i) => {
+    const light = uniformDirectionalLights.get(i);
     const directLight = getDirectionalLightInfo(light, geometry);
     const dotNL = saturate(dot(geometry.normal, directLight.direction));
     const irradiance = dotNL.multiplyVec3(light.color);

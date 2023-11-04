@@ -9,11 +9,16 @@ import {
   UniformArrayNode,
   Vec2Node,
 } from '../..';
-import { varyingTransformed } from '../transformed';
+import { transformed, varyingTransformed } from '../transformed';
 
 import { uniformCameraNear, uniformShadowFar } from './common-material';
 
 const linearDepth = varyingTransformed.mvPosition
+  .z()
+  .multiply(float(-1))
+  .divide(uniformShadowFar.subtract(uniformCameraNear));
+
+const linearDepthVertex = transformed.mvPosition
   .z()
   .multiply(float(-1))
   .divide(uniformShadowFar.subtract(uniformCameraNear));
@@ -25,15 +30,16 @@ export const CSM_cascades = new UniformArrayNode(
   CSM_CASCADES
 );
 
-export function CSM_LightFactor(i: IntNode): FloatNode {
+export function CSM_LightFactor(i: IntNode, fragment = true): FloatNode {
+  const depth = fragment ? linearDepth : linearDepthVertex;
   const isCsmLight = i.lt(CSM_CASCADES);
   return selectPreCompile(
     isCsmLight,
     select(
-      linearDepth
+      depth
         .gte(CSM_cascades.get(i).x())
         .and(
-          linearDepth
+          depth
             .lt(CSM_cascades.get(i).y())
             .or(i.equals(CSM_CASCADES.subtract(int(1))))
         ),

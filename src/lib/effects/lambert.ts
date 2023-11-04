@@ -53,7 +53,7 @@ function calculateDirLight(geometry: Geometry): Vec3Node {
     const directLightColor_Diffuse = directLight.color;
     return directLightColor_Diffuse
       .multiplyScalar(saturate(dotNL))
-      .multiplyScalar(CSM_LightFactor(i));
+      .multiplyScalar(CSM_LightFactor(i, false));
   });
 }
 
@@ -72,7 +72,7 @@ export function lambertMaterial(
   const combinedDirLight = calculateDirLight(geometry);
 
   const vLightFront = varyingVec3(
-    combinedPointLight.add(combinedDirLight).add(combinedSpotLight)
+    combinedPointLight.add(combinedSpotLight).add(combinedDirLight)
   );
   const vIndirectFront = varyingVec3(combinedHemiLight.add(uniformAmbient));
 

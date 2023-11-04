@@ -88,7 +88,7 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
               return `${m[1]} ${m[2]};`;
             });
           })
-          .reduce((a, v) => a.concat(v))
+          .reduce((a, v) => a.concat(v), [])
           .join('\n');
 
         c.chunks.slice(innerChunkStartIndex).forEach((innerChunk, i) => {
@@ -152,7 +152,7 @@ export abstract class ArrayNode<T extends ShaderNode<string>>
               return `${m[1]} ${m[2]};`;
             });
           })
-          .reduce((a, v) => a.concat(v))
+          .reduce((a, v) => a.concat(v), [])
           .join('\n');
 
         c.chunks.slice(innerChunkStartIndex).forEach((innerChunk, i) => {
