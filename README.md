@@ -5,6 +5,10 @@ Create shaders with typescript or javascript for Three.js. The library provides 
 ## Why?
 Writing shaders using GLSL for Three.js is not a great developer experience. First of, it is a new language to learn. Second, and more imprtantly, it involves combining chunks of code as strings in order to provide code reusability. Common non-trivial functionality like calculating ligthing is hard to reuse which leads to poor solutions of trying to inject strings of GLSL in multiple places in the built in shaders to add the needed functionality.
 
+## Hology Engine
+
+This library is integrated in Hology Engine, a game engine and editor for creating 3D experiences. Check out https://hology.app to get started. 
+
 ## Features
 
 * Close to 100% support for GLSL language and standard library
